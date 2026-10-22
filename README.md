@@ -3,30 +3,42 @@
 
 ## Project overview
 
-_One-sentence description of your project._
+Rental Application Passport lets renters reuse sensitive application evidence while disclosing only the package intended for each property manager.
 
 Built with [TideCloak](https://tide.org/tidecloak?utm_source=github&utm_medium=readme&utm_campaign=unlocked).
 
 ### 1. Vision & originality
 
-<!-- What new product, service, experience or way of working are you proposing? What makes your idea distinctive? -->
+Renters repeatedly send payslips, identity details, and references to organisations they may never work with again. This project turns those documents into reusable, encrypted application packages. The renter chooses which package is intended for each recipient instead of sending one complete dossier to everyone.
 
 ### 2. Trust constraint insight
 
-<!-- What is difficult, risky or impossible today because trust, privacy or security gets in the way? Explain what becomes possible when that constraint is removed. -->
+Today, every application creates another readable copy of highly sensitive data in an inbox, database, or administrator-controlled system. Renters must trust every recipient and platform operator not to inspect, leak, or misuse it. Removing that central reading capability makes selective disclosure practical.
 
 ### 3. Value & impact
 
-<!-- Who would benefit, and how would their lives or work improve? Give a concrete example of why this matters. -->
+A renter can send income evidence to one property manager and rental references to another. Each manager receives enough information to assess their application without gaining access to the other package. The renter shares less data, while managers still receive verifiable access to what they need.
 
 ### 4. Why TideCloak matters
 
-<!-- How does your application use TideCloak, and how does that integration help enable your idea? Connect the technology to the possibility you are demonstrating. -->
+TideCloak provides real identities, governed permissions, and tag-based end-to-end encryption. Decryption happens only in an authorised user session. The application and its administrator store ciphertext and metadata but do not hold a master decryption key, which ordinary login-only OAuth integrations do not guarantee.
 
 ### 5. Prototype & storytelling
 
-<!-- What does your prototype demonstrate today? Describe the key interaction judges should look for. -->
+The prototype uses four separate TideCloak accounts: renter, Manager A, Manager B, and administrator. Manager A can open only the income package; Manager B can open only the reference package; the administrator can inspect audit metadata but cannot decrypt either package. Denied attempts remain visible so the trust boundary is easy to verify.
+
+## Status
+
+The repository is currently in the specification phase. Application code has not been scaffolded yet.
 
 ## Setup
 
-<!-- How to install and run the prototype. -->
+The implementation will use the official TideCloak Next.js initializer and a local TideCloak dev container. Until scaffolding is complete, use [docs/CONTENT.md](docs/CONTENT.md) as the entry point for requirements, architecture, integration, and acceptance criteria.
+
+Prerequisites:
+
+- Docker CLI; Docker Desktop is optional.
+- Node.js 20.9 or later, as required by the current TideCloak quickstart.
+- Internet access for Tide enrolment and Cybersecurity Fabric operations.
+
+Do not treat the repository as runnable until `package.json` exists and the setup instructions have been verified against it.

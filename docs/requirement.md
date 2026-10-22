@@ -1,87 +1,151 @@
+# Requirements Specification
 
-# REQUIREMENTS SPECIFICATION
+## 1. Context
 
-**Hackathon:** UNLOCKED Challenge (RMIT x Tide)
-**Core Paradigm:** Emergent Authority via TideCloak Integration
+- **Challenge:** UNLOCKED Challenge (RMIT x Tide)
+- **Challenge page:** <https://tide.org/unlocked#start>
+- **Product:** Rental Application Passport
+- **Implementation timebox:** maximum seven hours
+- **Current phase:** Specify; no plan or application code is included yet
 
-Link Hackathon Challenge: [tide.org/unlocked#start](https://tide.org/unlocked#start)
+This document combines the supplied challenge requirements with the product decisions confirmed during discovery. Before submission, compare it once more with the live challenge page in case the organiser changes a rule.
 
-## 1. Executive Summary & Objective
+## 2. Objective
 
-This project builds a functional prototype addressing a critical real-world **Trust Bottleneck**—a scenario where progress, collaboration, or user data security is constrained because a central authority (admin, database manager, single cloud server, or AI agent) holds unilateral power to access data or override rules.
+Build a functional local prototype that demonstrates one trust bottleneck: renters currently give complete copies of sensitive evidence to every property manager and must trust each recipient and platform administrator with the plaintext.
 
-By integrating **TideCloak**, the application shifts from centralized trust to **Emergent Authority**, ensuring that sensitive operations and data decryption can only occur when explicit user consent, cryptographic policies, and multi-party approvals align. No single actor—including application administrators or the AI itself—holds a master key.
+The prototype must show that decryption authority comes from a real TideCloak identity and policy context. No application server, database operator, or UI administrator may hold a master capability to read all rental packages.
 
----
+## 3. Binding Product Decisions
 
-## 2. Technical & Architecture Requirements
+1. Use Next.js scaffolded from the official `@tidecloak/nextjs` initializer.
+2. Run a real TideCloak dev container through Docker CLI. Docker Desktop is optional.
+3. Use four separate TideCloak accounts: `tenant`, `manager-a`, `manager-b`, and `admin`.
+4. Use only synthetic rental data.
+5. Keep the prototype local-first. A production database and cloud deployment are not required.
+6. Store or transport ciphertext plus non-sensitive metadata only.
+7. Make denied access visible in the UI.
+8. Do not create a role-switch control that impersonates another account.
 
-### 2.1 TideCloak & IAM Setup
+## 4. Functional Requirements
 
-* **TideCloak Container / SDK Integration:**
-  * The application must use the official `@tidecloak/react` or `@tidecloak/nextjs` SDK (or standard TideCloak OIDC adapter) for user identity, authentication, and permission management.
-  * TideCloak must run against a TideCloak dev container/server or Tide's Cybersecurity Fabric network.
-* **Emergent Authority Enforcers:**
-  * Define explicit policy gates for high-risk/sensitive actions (e.g., viewing unmasked personally identifiable information [PII], executing transactions, revealing whistleblowing submissions, or accessing cross-institutional health records).
-  * Sensitive data must remain encrypted at rest and in transit. Access tokens and decryption authority must emerge dynamically based on strict policy conditions rather than static database permissions.
+### FR-1 — Authentication
 
-### 2.2 Prototype Functional Scope
+Each of the four demo users must sign in through TideCloak and receive its own session and role claims.
 
-* **Focused Interactive Scenario:** Demonstrate **ONE clear, compelling core interaction loop** where an action is attempted, evaluated by TideCloak policy gates, and executed only when authorized.
-* **Role-Based Visualization:** Implement UI perspectives for at least two roles (e.g., Data Owner/User vs. Administrator/Auditor/Third-Party) to visually prove that an Administrator cannot unilaterally bypass permissions or inspect private payload data.
-* **Mocked Data Strategy:** Use synthetic, mocked JSON structures or local client-side state. Complex backend databases are unnecessary as long as authorization flows through TideCloak.
+### FR-2 — Package creation
 
----
+The tenant must be able to create two distinct synthetic packages:
 
-## 3. Non-Functional & Hackathon Compliance Rules
+- `income_manager_a`: employment, monthly income, and a fictional payslip preview;
+- `reference_manager_b`: rental history and a fictional landlord reference.
 
-* **TideCloak Criticality Rule:** The project must **NOT** be easily replacable by standard OAuth 2.0 / Firebase / Auth0 setups. TideCloak must materially alter the app's capability by guaranteeing that no master key exists in the backend database or backend server.
-* **Repository Layout:** Public GitHub Repository containing:
-  * Clean, runnable source code (e.g., Next.js / React + Vite / Node.js).
-  * `README.md` containing the official < 300-word template at the very top.
-  * A two-minute video demo saved as `demo.mp4` (< 100MB).
-  * Setup instructions clearly separated from the submission overview.
+Before encryption, package data must be serialized to a `string` or `Uint8Array`, matching TideCloak E2EE input requirements.
 
----
+### FR-3 — Selective encryption
 
-## 4. Deliverables Architecture & Checklist
+The tenant must encrypt each package with its matching TideCloak tag. Plaintext must not be persisted by the application.
 
-```text
-.
-├── README.md               # Includes top 300-word submission overview
-├── requirements.md         # This specification file for AI Coding Agents
-├── demo.mp4                # <2-min screen recording (<100MB)
-├── package.json            # Setup & runner scripts (npm run dev)
-└── src/
-    ├── config/             # tidecloak.json adapter configuration
-    ├── components/         # Auth Gate UI & Protected Feature Components
-    └── App.tsx / page.tsx  # Core interactive user loop
-```
+### FR-4 — Selective decryption
 
+- Tenant may decrypt both packages.
+- Manager A may decrypt only `income_manager_a`.
+- Manager B may decrypt only `reference_manager_b`.
+- Admin may decrypt neither package.
 
-## 5. README.md Template Framework (< 300 Words)
+The application must call the TideCloak decryption helper and surface its real result. A hidden UI control or client-only conditional is not an access-control implementation.
 
-The top section of README.md must strictly answer these 5 prompts:
+### FR-5 — Metadata view
 
+Admin must be able to view non-sensitive metadata such as package ID, package type, owner, intended recipient, creation time, and status. Metadata must not contain the sensitive fields from either package.
 
-Vision & originality: What new product, service, or experience are you proposing?
+### FR-6 — Audit feedback
 
-Trust constraint insight: What trust/privacy problem holds this back today, and what becomes possible when removed?
+The interface must visibly distinguish at least:
 
-Value & impact: Who benefits, and what is a concrete example of the real-world improvement?
+- authenticated and unauthenticated;
+- encrypted and decrypted;
+- access granted and access denied;
+- role/policy mismatch;
+- loading and integration failure.
 
-Why TideCloak matters: How does TideCloak's Emergent Authority specifically enable this app where traditional auth fails?
+### FR-7 — Revocation semantics
 
-Prototype & storytelling: What primary interaction should judges look for when testing the prototype?
+Removing a decrypt role is a governed administrative change. After the change is committed and the affected user renews their session, a future decrypt attempt must be denied. The product must state that revocation cannot erase plaintext already viewed or copied by a recipient.
 
-## 6. AI Agent Execution Directive
+## 5. TideCloak and Trust Requirements
 
-When an AI Coding Agent (Claude Code, Cursor, Windsurf, VS Code via Tide MCP) executes this project:
+### TR-1 — Real integration
 
-Analyze Project Domain: Pick a concrete scenario (e.g., Blind Tenant Application Passport, Cross-Hospital Research Vault, AI Executive Assistant Guardrails, or Whistleblower Vault).
+Use the official Next.js SDK, TideCloak dev server, Tide enrolment, QEA-enabled realm, and E2EE helpers. Mock authentication or simulated cryptography cannot satisfy the core demo.
 
-Scaffold Frontend: Generate a React/Next.js client using standard TideCloak adapter patterns.
+### TR-2 — Tag roles
 
-Wire Authorization Hooks: Use useTideCloak() hooks or auth middleware to guard sensitive routes and actions.
+For every E2EE tag, define matching realm roles:
 
-Provide Clear Visual Feedback: Ensure the UI explicitly shows "Access Denied / Awaiting Emergent Authority" when unauthorized, and displays decrypted content/executed actions only after TideCloak policy validation succeeds.
+- `_tide_<tag>.selfencrypt`
+- `_tide_<tag>.selfdecrypt`
+
+Package-specific decrypt roles must be assigned to individual demo users, not to `default-roles-<realm>`.
+
+### TR-3 — No master decryptor
+
+The application must not contain a server key, service account, administrator endpoint, or fallback path capable of decrypting every package.
+
+### TR-4 — QEA claim boundary
+
+The core four-account demo proves governed role changes and selective E2EE access. A one-admin development realm does **not** prove multi-party approval because its threshold is one. Claiming non-unilateral policy governance requires a multi-admin QEA configuration with a threshold greater than one.
+
+### TR-5 — Server/API protection
+
+If an API route serves ciphertext or metadata, it must verify the TideCloak token server-side. Client-side route guards are helpful for presentation but are not sufficient protection for an API.
+
+## 6. Non-Functional Requirements
+
+- **Time:** implementation and demo preparation must fit within seven hours.
+- **Story:** the main interaction must be explainable and recordable in under two minutes.
+- **Privacy:** no real identity, financial, employment, or rental-reference data.
+- **Security:** no secrets, tokens, passwords, plaintext packages, or local TideCloak database files in version control.
+- **Clarity:** an observer must be able to tell which identity is active and why an action succeeded or failed.
+- **Reliability:** the demo must be preflighted with all four accounts and both positive and negative access cases.
+- **Portability:** setup must work with Docker CLI; Docker Desktop must not be required.
+
+## 7. Acceptance Matrix
+
+| Actor | Income Pack | Reference Pack | Metadata | Expected result |
+| --- | --- | --- | --- | --- |
+| Tenant | Decrypt | Decrypt | Own records | Allowed |
+| Manager A | Decrypt | Attempt decrypt | Assigned records | Income allowed; reference denied |
+| Manager B | Attempt decrypt | Decrypt | Assigned records | Income denied; reference allowed |
+| Admin | Attempt decrypt | Attempt decrypt | All audit metadata | Both denied |
+| Signed-out user | Attempt access | Attempt access | None | Redirected or denied |
+
+## 8. Deliverables
+
+The final challenge repository must contain:
+
+- runnable Next.js source code;
+- a `package.json` with verified development and build scripts;
+- the TideCloak adapter/configuration required for local development, excluding secrets;
+- the official challenge overview at the top of `README.md`, under 300 words;
+- setup instructions separate from the challenge overview;
+- `demo.mp4`, under two minutes and under 100 MB;
+- this SDD document set kept in sync with the implementation.
+
+## 9. Out of Scope
+
+- Real rental applications or real personal information.
+- Production file storage, malware scanning, KYC, credit scoring, payments, leases, and e-signatures.
+- A property-search marketplace.
+- Mobile-native applications.
+- Production deployment, high availability, or scale testing.
+- Claims that revocation recalls information already viewed.
+
+## 10. Official References
+
+- UNLOCKED Challenge: <https://tide.org/unlocked#start>
+- TideCloak quickstart: <https://docs.tide.org/get-started/Tidecloak%20Quickstart>
+- Next.js SDK introduction: <https://docs.tide.org/Languages/NextJS/tidecloak-nextjs-intro>
+- Tide E2EE setup: <https://docs.tide.org/Admin/e2ee>
+- Tide QEA setup: <https://docs.tide.org/Admin/SetupIGA>
+- TideCloak integration whitepaper: <https://tide.org/whitepaper/tidecloak-integration>
