@@ -15,18 +15,20 @@ Read these documents in order:
 5. `docs/tidecloak-integration.md`
 6. `docs/demo-guide.md`
 7. `docs/decisions/ADR-001-core-architecture.md`
+8. `docs/guide-pland.md`
 
 If documents conflict, follow the precedence defined in `docs/CONTENT.md`. Update the relevant specification before changing behaviour.
 
 ## Current Phase
 
-- The project is in the SDD Specify phase.
-- Do not create `plans/`, task breakdowns, or application code unless the user explicitly advances the project to planning or implementation.
+- The project is in the SDD Plan phase; the phase files are under `docs/plans/`.
+- Do not create application code unless the user reviews the plan and explicitly advances the project to implementation.
 - Do not claim the prototype is runnable while `package.json` is absent.
 
 ## Fixed Product Decisions
 
 - Framework: Next.js using the official `@tidecloak/nextjs` initializer.
+- Package manager: Bun. Commit `bun.lock`; do not create or commit `package-lock.json`.
 - Identity system: a real TideCloak dev container, not mocked authentication.
 - Core identities: `tenant`, `manager-a`, `manager-b`, and `admin`, each with a separate TideCloak account.
 - Sensitive payloads: synthetic data only, encrypted in the browser with TideCloak E2EE.
@@ -60,7 +62,7 @@ Always:
 - Keep the core demo loop working before adding polish.
 - Use TypeScript and explicit domain names such as `RentalPackage`, `AccessDecision`, and `recipientId`.
 - Validate role/tag mappings against `docs/tidecloak-integration.md`.
-- Run the repository's actual lint and build commands before declaring a change complete.
+- Run the repository's Bun lint and build commands before declaring a change complete.
 - Update README setup instructions when commands become executable.
 
 Ask first:
@@ -84,5 +86,5 @@ A feature is complete only when:
 - the authorised path succeeds with the correct real TideCloak account;
 - the unauthorised path fails with the wrong account and with Admin;
 - ciphertext remains unreadable outside an authorised browser session;
-- `npm run lint` and `npm run build` pass once those scripts exist;
+- `bun --bun run lint` and `bun --bun run build` pass once those scripts exist;
 - affected documentation reflects the implemented behaviour.

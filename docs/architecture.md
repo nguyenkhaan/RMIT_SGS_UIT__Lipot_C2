@@ -33,6 +33,12 @@ Each actor uses a separate authenticated browser session. The Next.js applicatio
 
 ## 3. Components
 
+The prototype is one full-stack Next.js project. Browser components and Next.js
+route handlers share explicit domain contracts, but the browser remains the only
+place where plaintext encryption and decryption may occur. Implementation is
+sliced by user-visible feature so frontend and backend can progress in parallel
+after each shared contract is fixed.
+
 ### Next.js user interface
 
 - Shows the current signed-in identity and business role.
@@ -60,6 +66,14 @@ For the prototype, this may be an in-memory store or a minimal local fixture gen
 - creation time and status.
 
 It must not contain employment, salary, payslip, rental history, or reference plaintext.
+
+### Next.js route handlers
+
+- Live in the same project as the frontend.
+- Verify the TideCloak access token before returning protected metadata or ciphertext.
+- Accept and return ciphertext plus safe metadata only.
+- Enforce owner/recipient/auditor metadata scope from verified claims.
+- Never call a decrypt helper or receive plaintext package fields.
 
 ### TideCloak dev server
 

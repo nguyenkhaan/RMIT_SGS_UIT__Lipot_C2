@@ -29,7 +29,9 @@ The prototype uses four separate TideCloak accounts: renter, Manager A, Manager 
 
 ## Status
 
-The repository is currently in the specification phase. Application code has not been scaffolded yet.
+The repository is currently in the planning phase. The implementation plan is
+under [`docs/plans/`](docs/plans/README.md); application code has not been
+scaffolded yet.
 
 ## Setup
 
@@ -39,6 +41,8 @@ Prerequisites:
 
 - Docker CLI; Docker Desktop is optional.
 - Node.js 20.9 or later, as required by the current TideCloak quickstart.
+- Bun; this repository uses Bun for scaffolding, installing dependencies and
+  running project scripts. See [docs/guide-pland.md](docs/guide-pland.md).
 - Internet access for Tide enrolment and Cybersecurity Fabric operations.
 
 Do not treat the repository as runnable until `package.json` exists and the setup instructions have been verified against it.

@@ -111,5 +111,5 @@ MVP bao gồm:
 
 ## Câu hỏi còn mở cho giai đoạn triển khai
 
-- Phiên bản chính xác của Next.js và `@tidecloak/nextjs` sẽ được lấy từ initializer và khóa trong `package-lock.json`.
+- Phiên bản chính xác của Next.js và `@tidecloak/nextjs` sẽ được lấy từ initializer và khóa trong `bun.lock`.
 - Nếu thời gian còn lại cho phép, có thể chuẩn bị tổng cộng ba tài khoản quản trị QEA để ngưỡng phê duyệt lớn hơn một. Bốn tài khoản nghiệp vụ lõi không tự chứng minh thuộc tính này.

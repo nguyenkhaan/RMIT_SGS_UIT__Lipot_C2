@@ -1,6 +1,8 @@
 # Documentation Index
 
-This directory is the source of truth for the Specify phase of Rental Application Passport. It contains eight documents, below the project limit of ten. No `plans/` or task breakdown has been created.
+This directory is the source of truth for the Specify and Plan phases of Rental
+Application Passport. The compact specification set remains eight documents;
+phase-by-phase implementation plans live under `plans/`.
 
 ## Recommended Reading Order
 
@@ -13,7 +15,19 @@ This directory is the source of truth for the Specify phase of Rental Applicatio
 | 5 | [tidecloak-integration.md](tidecloak-integration.md) | Gives the official-doc-backed TideCloak setup and integration contract. |
 | 6 | [demo-guide.md](demo-guide.md) | Defines the two-minute story, preflight checks, and observable acceptance scenarios. |
 | 7 | [decisions/ADR-001-core-architecture.md](decisions/ADR-001-core-architecture.md) | Records why Next.js, real TideCloak, browser E2EE, and minimal storage were chosen. |
-| 8 | This document | Provides navigation and document governance. |
+| 8 | [plans/README.md](plans/README.md) | Maps dependencies, timebox, phase order, full-stack delivery model, and project-wide Definition of Done. |
+| 9 | [guide-pland.md](guide-pland.md) | Assigns the two-person team, defines Bun commands, and records cross-phase handoffs. |
+| 10 | This document | Provides navigation and document governance. |
+
+Read the seven phase files in numeric order after the plan index:
+
+1. [`plans/01-environment-and-scaffold.md`](plans/01-environment-and-scaffold.md)
+2. [`plans/02-realm-identities-and-policies.md`](plans/02-realm-identities-and-policies.md)
+3. [`plans/03-authenticated-full-stack-shell.md`](plans/03-authenticated-full-stack-shell.md)
+4. [`plans/04-tenant-encryption-slice.md`](plans/04-tenant-encryption-slice.md)
+5. [`plans/05-selective-decryption-slice.md`](plans/05-selective-decryption-slice.md)
+6. [`plans/06-admin-revocation-and-hardening.md`](plans/06-admin-revocation-and-hardening.md)
+7. [`plans/07-acceptance-documentation-and-demo.md`](plans/07-acceptance-documentation-and-demo.md)
 
 Root-level supporting documents:
 
@@ -30,6 +44,7 @@ When two documents disagree, resolve the conflict in this order:
 4. `architecture.md` and `tidecloak-integration.md` technical contracts.
 5. `demo-guide.md` presentation details.
 6. The ADR, which explains decisions but does not override newer requirements.
+7. `plans/`, which sequences implementation but never overrides the documents above.
 
 For TideCloak API behaviour, current official Tide documentation overrides remembered or inferred behaviour. If the docs and generated project differ, stop, record the mismatch, and update the specification before proceeding.
 
@@ -44,12 +59,15 @@ For TideCloak API behaviour, current official Tide documentation overrides remem
 | `tidecloak-integration.md` | Proposed | Tide documentation or generated SDK surface differs. |
 | `demo-guide.md` | Proposed | Implemented UI flow or video constraint changes. |
 | `ADR-001` | Accepted | A superseding architectural decision is approved. |
+| `plans/` | Ready for review | Scope, dependency, timebox, generated SDK contract, or implementation outcome changes. |
+| `guide-pland.md` | Ready for review | Team assignment, Bun workflow, or cross-phase handoff changes. |
 
 ## SDD Phase Gate
 
-This repository is currently at **Specify**.
+This repository is currently at **Plan**.
 
-- Completed: intent discovery and direction confirmation.
-- In this phase: requirements, specification, architecture, integration contract, and acceptance story.
-- Not created: `plans/`, task lists, implementation code, or deployment assets.
-- Next gate: the user reviews and approves this document set before planning begins.
+- Completed: intent discovery, specification, architecture, integration contract,
+  and acceptance story; the user explicitly advanced the project to planning.
+- In this phase: review the dependency-ordered vertical-slice plans under `plans/`.
+- Not created: application code, deployment assets, or a runnable `package.json`.
+- Next gate: the user reviews and approves the plan before implementation begins.

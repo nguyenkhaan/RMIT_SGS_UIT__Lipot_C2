@@ -6,13 +6,20 @@ This document defines the minimum real TideCloak integration required by the pro
 
 ## 2. Official Starting Point
 
-The project uses the official Next.js initializer:
+The project uses the official Next.js initializer through Bun:
 
 ```powershell
-npm init @tidecloak/nextjs@latest rental-application-passport
+bun create @tidecloak/nextjs@latest rental-application-passport
 ```
 
-The official quickstart states that the initializer creates the realm and clients, configures the Tide identity provider, activates licensing, assigns the first administrator, and enables Quorum-Enforced Authorization. It pauses while the first administrator completes Tide enrolment.
+The official quickstart publishes `npm init @tidecloak/nextjs@latest`. Bun's
+documented `bun create <template>` runs the corresponding `create-<template>`
+package, so this project uses the Bun form above for Tide's
+`@tidecloak/create-nextjs` initializer. Phase 1 must verify it in a temporary
+directory before merge. The initializer creates the realm and clients, configures
+the Tide identity provider, activates licensing, assigns the first administrator,
+and enables Quorum-Enforced Authorization. It pauses while the first administrator
+completes Tide enrolment.
 
 Because this repository already contains documentation, do not run a generator that overwrites the root. First check the initializer's current help/behaviour, then preserve and merge the generated files deliberately.
 
@@ -22,7 +29,7 @@ Prerequisites from the current quickstart:
 
 - Docker running;
 - Node.js 20.9 or later;
-- npm, internet connectivity, and a browser for Tide enrolment.
+- Bun, internet connectivity, and a browser for Tide enrolment.
 
 Use a dedicated Docker volume so local TideCloak state never lands in the repository:
 
@@ -180,6 +187,9 @@ Do not log token contents, decrypted package content, passwords, or raw SDK resp
 
 - Quickstart and initializer: <https://docs.tide.org/get-started/Tidecloak%20Quickstart>
 - Next.js SDK: <https://docs.tide.org/Languages/NextJS/tidecloak-nextjs-intro>
+- Bun project creation: <https://bun.sh/docs/runtime/templating/create>
+- Bun install and lockfile: <https://bun.sh/docs/pm/cli/install>
+- Bun with Next.js: <https://bun.sh/guides/ecosystem/nextjs>
 - Next.js authentication and E2EE flow: <https://docs.tide.org/Languages/NextJS/tidecloak-nextjs-discussion>
 - E2EE roles and helper requirements: <https://docs.tide.org/Admin/e2ee>
 - QEA setup and user role changes: <https://docs.tide.org/Admin/SetupIGA>

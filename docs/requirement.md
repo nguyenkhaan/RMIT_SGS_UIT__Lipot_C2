@@ -6,7 +6,8 @@
 - **Challenge page:** <https://tide.org/unlocked#start>
 - **Product:** Rental Application Passport
 - **Implementation timebox:** maximum seven hours
-- **Current phase:** Specify; no plan or application code is included yet
+- **Current phase:** Plan; phase files exist under `docs/plans/`, but application
+  code has not been scaffolded yet
 
 This document combines the supplied challenge requirements with the product decisions confirmed during discovery. Before submission, compare it once more with the live challenge page in case the organiser changes a rule.
 
@@ -26,6 +27,11 @@ The prototype must show that decryption authority comes from a real TideCloak id
 6. Store or transport ciphertext plus non-sensitive metadata only.
 7. Make denied access visible in the UI.
 8. Do not create a role-switch control that impersonates another account.
+9. Keep the frontend and backend in this single Next.js project. Deliver each
+   capability as a vertical feature slice: shared contract first, then browser UI
+   and server route/store work in parallel, followed by an integration checkpoint.
+10. Use Bun as the project package manager and script runner. Commit `bun.lock`;
+    do not create or commit `package-lock.json`.
 
 ## 4. Functional Requirements
 
