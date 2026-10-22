@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"tide": {
+			"type": "http",
+			"url": "https://mcp.tide.org/mcp"
+		}
+	},
+	"inputs": []
+}
