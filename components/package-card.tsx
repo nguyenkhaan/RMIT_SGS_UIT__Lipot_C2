@@ -16,7 +16,7 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
     setDecryptedData(null)
 
     try {
-      // Direct call to TideCloak E2EE decrypt helper with the stored ciphertext and exact tag
+      // Direct call to decrypt helper with the stored payload and exact tag
       const [plaintext] = await doDecrypt([
         {
           encrypted: packageData.protectedPayload,
@@ -27,7 +27,7 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
       const parsed = JSON.parse(plaintext)
       setDecryptedData(parsed)
     } catch (err: any) {
-      setPolicyDenial(err.message || 'Decryption denied by TideCloak policy')
+      setPolicyDenial(err.message || 'Access denied by role policy')
     } finally {
       setDecrypting(false)
     }
@@ -39,7 +39,6 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
   }
 
   const isIncome = packageData.type === 'income'
-  const isTenantOwner = user?.identityId === packageData.ownerId
 
   return (
     <div className="glass-panel" style={cardContainerStyle}>
@@ -66,11 +65,11 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
           <span style={metaValueStyle}>@{packageData.ownerId}</span>
         </div>
         <div style={metaItemStyle}>
-          <span style={metaLabelStyle}>Intended Recipient:</span>
+          <span style={metaLabelStyle}>Target Recipient:</span>
           <span style={metaValueStyle}>@{packageData.recipientId}</span>
         </div>
         <div style={metaItemStyle}>
-          <span style={metaLabelStyle}>E2EE Tag:</span>
+          <span style={metaLabelStyle}>Access Tag:</span>
           <span className="badge badge-tag" style={{ fontSize: '0.68rem' }}>
             {packageData.tag}
           </span>
@@ -83,13 +82,13 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
         </div>
       </div>
 
-      {/* Ciphertext State Box */}
+      {/* Protected Payload Preview Box */}
       <div style={ciphertextBannerStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em' }}>
-            STORAGE PAYLOAD (CIPHERTEXT):
+            PROTECTED PAYLOAD:
           </span>
-          <span style={{ fontSize: '0.68rem', color: 'var(--accent-cyan)' }}>🔒 TideCloak E2EE Bound</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--accent-cyan)' }}>🔒 Tag-Bound</span>
         </div>
         <div style={cipherHashTextStyle}>
           {packageData.protectedPayload.slice(0, 48)}...
@@ -105,11 +104,11 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
             disabled={decrypting}
             style={{ width: '100%' }}
           >
-            {decrypting ? 'Decrypting via TideCloak...' : '🔓 Decrypt Evidence'}
+            {decrypting ? 'Evaluating Access...' : '🔓 Open Package'}
           </button>
         ) : (
           <button className="btn btn-secondary" onClick={handleHide} style={{ width: '100%', marginBottom: '0.75rem' }}>
-            Hide Plaintext / Reset View
+            Close Package / Reset View
           </button>
         )}
 
@@ -117,7 +116,7 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
         {decryptedData && (
           <div style={decryptedBoxStyle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-              <span>✓ TideCloak Decryption Granted</span>
+              <span>✓ Access Granted (Role Matched)</span>
             </div>
             {isIncome ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8rem' }}>
@@ -142,13 +141,13 @@ export function PackageCard({ packageData }: { packageData: RentalPackage }) {
         {policyDenial && (
           <div style={denialBoxStyle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fda4af', fontWeight: 700, fontSize: '0.85rem' }}>
-              <span>🛑 Access Denied by TideCloak</span>
+              <span>🛑 Access Denied: Policy Mismatch</span>
             </div>
             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem', lineHeight: 1.4 }}>
               {policyDenial}
             </div>
             <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.4rem' }}>
-              TideCloak verified your session token but your realm roles do not include the decrypt tag for this package.
+              Your active session lacks the required tag decrypt permission for this package.
             </div>
           </div>
         )}

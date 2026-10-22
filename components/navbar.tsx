@@ -38,7 +38,7 @@ export function Navbar({ onOpenLogin }: { onOpenLogin: () => void }) {
           </div>
           <div>
             <div style={titleStyle}>Rental Passport</div>
-            <div style={subtitleStyle}>TideCloak Selective Decryption Demo</div>
+            <div style={subtitleStyle}>Selective Rental Evidence Access Control</div>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export function Navbar({ onOpenLogin }: { onOpenLogin: () => void }) {
           <span style={{ opacity: 0.4 }}>|</span>
           <span>Client: <strong>rental-passport-web</strong></span>
           <span style={{ opacity: 0.4 }}>|</span>
-          <span>E2EE: <strong>Active</strong></span>
+          <span>Simulation Mode: <strong>Active</strong></span>
         </div>
 
         {/* User state / Controls */}
@@ -74,7 +74,7 @@ export function Navbar({ onOpenLogin }: { onOpenLogin: () => void }) {
                 className="btn btn-secondary"
                 onClick={handleRenew}
                 disabled={renewing}
-                title="Renew session after QEA permission changes"
+                title="Renew session after permission changes"
                 style={{ fontSize: '0.8rem', padding: '0.5rem 0.85rem' }}
               >
                 {renewing ? 'Renewing...' : renewSuccess ? '✓ Renewed' : '🔄 Renew Session'}
@@ -90,7 +90,7 @@ export function Navbar({ onOpenLogin }: { onOpenLogin: () => void }) {
             </div>
           ) : (
             <button className="btn btn-primary" onClick={onOpenLogin}>
-              Sign In with TideCloak
+              Select Demo Identity
             </button>
           )}
         </div>

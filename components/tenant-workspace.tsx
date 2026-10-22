@@ -17,11 +17,9 @@ export function TenantWorkspace({
   packages: RentalPackage[]
   onRefreshPackages: () => void
 }) {
-  const { doEncrypt, user } = useTideAuth()
+  const { doEncrypt } = useTideAuth()
   const [encryptingIncome, setEncryptingIncome] = useState(false)
   const [encryptingRef, setEncryptingRef] = useState(false)
-  const [incomeCreated, setIncomeCreated] = useState(false)
-  const [refCreated, setRefCreated] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // Check if packages are already created
@@ -35,37 +33,36 @@ export function TenantWorkspace({
       // 1. Serialize synthetic payload to string
       const plaintext = JSON.stringify(SYNTHETIC_INCOME_DATA)
 
-      // 2. Browser E2EE Encrypt with exact tag 'income_manager_a'
-      const [ciphertext] = await doEncrypt([
+      // 2. Browser protected payload with tag 'income_manager_a'
+      const [payload] = await doEncrypt([
         { data: plaintext, tags: [TAG_MAPPING.income.tag] },
       ])
 
       // 3. Immediately clear working plaintext reference!
 
-      // 4. POST ciphertext + safe metadata to server API
+      // 4. POST protected payload + safe metadata to server API
       const res = await fetch('/api/packages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user?.token}`,
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
           type: 'income',
           recipientId: TAG_MAPPING.income.recipientId,
           tag: TAG_MAPPING.income.tag,
-          protectedPayload: ciphertext,
+          protectedPayload: payload,
         }),
       })
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Failed to submit encrypted package')
+        throw new Error(err.error || 'Failed to submit protected package')
       }
 
-      setIncomeCreated(true)
       onRefreshPackages()
     } catch (err: any) {
-      setErrorMsg(err.message || 'Encryption failed')
+      setErrorMsg(err.message || 'Operation failed')
     } finally {
       setEncryptingIncome(false)
     }
@@ -78,37 +75,36 @@ export function TenantWorkspace({
       // 1. Serialize synthetic payload to string
       const plaintext = JSON.stringify(SYNTHETIC_REFERENCE_DATA)
 
-      // 2. Browser E2EE Encrypt with exact tag 'reference_manager_b'
-      const [ciphertext] = await doEncrypt([
+      // 2. Browser protected payload with tag 'reference_manager_b'
+      const [payload] = await doEncrypt([
         { data: plaintext, tags: [TAG_MAPPING.reference.tag] },
       ])
 
       // 3. Immediately clear working plaintext reference!
 
-      // 4. POST ciphertext + safe metadata to server API
+      // 4. POST protected payload + safe metadata to server API
       const res = await fetch('/api/packages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user?.token}`,
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
           type: 'reference',
           recipientId: TAG_MAPPING.reference.recipientId,
           tag: TAG_MAPPING.reference.tag,
-          protectedPayload: ciphertext,
+          protectedPayload: payload,
         }),
       })
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Failed to submit encrypted package')
+        throw new Error(err.error || 'Failed to submit protected package')
       }
 
-      setRefCreated(true)
       onRefreshPackages()
     } catch (err: any) {
-      setErrorMsg(err.message || 'Encryption failed')
+      setErrorMsg(err.message || 'Operation failed')
     } finally {
       setEncryptingRef(false)
     }
@@ -127,8 +123,9 @@ export function TenantWorkspace({
               <span className="badge badge-renter">Active Renter Session</span>
             </div>
             <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem', maxWidth: '720px' }}>
-              Selectively prepare evidence packages for distinct property managers. Data is encrypted in your
-              browser via TideCloak E2EE tags before submission. The backend and administrator never possess decryption keys.
+              Selectively prepare evidence packages for distinct property managers. Payload data is protected in your
+              browser with tag-specific authority before submission. The storage layer and platform administrators
+              hold no central decryption capability.
             </p>
           </div>
         </div>
@@ -179,7 +176,7 @@ export function TenantWorkspace({
           <div style={{ marginTop: '1.25rem' }}>
             {hasIncomePkg ? (
               <div style={statusPillGreenStyle}>
-                ✓ Encrypted & Published to Manager A
+                ✓ Protected & Sent to Manager A
               </div>
             ) : (
               <button
@@ -188,7 +185,7 @@ export function TenantWorkspace({
                 disabled={encryptingIncome}
                 style={{ width: '100%' }}
               >
-                {encryptingIncome ? 'Encrypting via TideCloak...' : '🔒 Encrypt & Send to Manager A'}
+                {encryptingIncome ? 'Protecting Payload...' : '🔒 Protect & Send to Manager A'}
               </button>
             )}
           </div>
@@ -231,7 +228,7 @@ export function TenantWorkspace({
           <div style={{ marginTop: '1.25rem' }}>
             {hasRefPkg ? (
               <div style={statusPillGreenStyle}>
-                ✓ Encrypted & Published to Manager B
+                ✓ Protected & Sent to Manager B
               </div>
             ) : (
               <button
@@ -240,7 +237,7 @@ export function TenantWorkspace({
                 disabled={encryptingRef}
                 style={{ width: '100%' }}
               >
-                {encryptingRef ? 'Encrypting via TideCloak...' : '🔒 Encrypt & Send to Manager B'}
+                {encryptingRef ? 'Protecting Payload...' : '🔒 Protect & Send to Manager B'}
               </button>
             )}
           </div>
@@ -250,11 +247,11 @@ export function TenantWorkspace({
       {/* Tenant's Published Packages with Decrypt Verification */}
       <div style={{ marginTop: '1rem' }}>
         <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc', marginBottom: '1rem' }}>
-          Your Published Packages (Decryption Verification)
+          Submitted Evidence Packages (Owner Verification)
         </h3>
         {packages.length === 0 ? (
           <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-            No packages published yet. Click the buttons above to encrypt and publish synthetic evidence.
+            No packages submitted yet. Click the buttons above to protect and submit synthetic evidence.
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>

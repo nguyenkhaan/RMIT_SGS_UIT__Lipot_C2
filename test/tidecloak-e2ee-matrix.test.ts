@@ -4,15 +4,15 @@ import {
   setManagerAIncomeRevocation,
 } from '../lib/demo/identities'
 import { savePackage, resetPackageStore, listPackagesForUser } from '../lib/rental-packages/store'
-import type { RentalPackage } from '../lib/rental-passport/contracts'
+import { SIMULATED_PAYLOAD_PREFIX, type RentalPackage } from '../lib/rental-passport/contracts'
 
-describe('TideCloak E2EE Access Matrix & Roles', () => {
+describe('Access Matrix & Policy Roles', () => {
   beforeEach(() => {
     setManagerAIncomeRevocation(false)
     resetPackageStore()
   })
 
-  test('Tenant identity possesses all 4 E2EE realm roles', () => {
+  test('Tenant identity possesses all 4 simulated package roles', () => {
     const tenant = findDemoIdentity('tenant')!
     expect(tenant).toBeDefined()
     expect(tenant.businessRole).toBe('renter')
@@ -38,7 +38,7 @@ describe('TideCloak E2EE Access Matrix & Roles', () => {
     expect(managerB.realmRoles).not.toContain('_tide_reference_manager_b.selfencrypt')
   })
 
-  test('Admin possesses auditor business role and NO E2EE decrypt roles', () => {
+  test('Admin possesses auditor business role and no package decrypt roles', () => {
     const admin = findDemoIdentity('admin')!
     expect(admin.businessRole).toBe('auditor')
     expect(admin.realmRoles).not.toContain('_tide_income_manager_a.selfdecrypt')
@@ -47,11 +47,11 @@ describe('TideCloak E2EE Access Matrix & Roles', () => {
     expect(admin.realmRoles).not.toContain('_tide_reference_manager_b.selfencrypt')
   })
 
-  test('Governed QEA revocation revokes income decrypt role from Manager A', () => {
+  test('Policy role revocation removes income decrypt role from Manager A', () => {
     // 1. Initial baseline: Manager A has role
     expect(findDemoIdentity('manager-a')!.realmRoles).toContain('_tide_income_manager_a.selfdecrypt')
 
-    // 2. QEA proposal committed: revoke role
+    // 2. Policy change: revoke role
     setManagerAIncomeRevocation(true)
 
     // 3. Renewed session: Manager A no longer has the role
@@ -62,7 +62,7 @@ describe('TideCloak E2EE Access Matrix & Roles', () => {
     expect(findDemoIdentity('manager-a')!.realmRoles).toContain('_tide_income_manager_a.selfdecrypt')
   })
 
-  test('Ciphertext store rejects unencrypted sensitive plaintext properties', () => {
+  test('Package store rejects unencrypted sensitive plaintext properties', () => {
     const maliciousPackage: RentalPackage = {
       id: 'pkg-leak-01',
       type: 'income',
@@ -77,14 +77,14 @@ describe('TideCloak E2EE Access Matrix & Roles', () => {
     expect(() => savePackage(maliciousPackage)).toThrow('SECURITY VIOLATION')
   })
 
-  test('Ciphertext store accepts authentic TideCloak ciphertext format', () => {
+  test('Package store accepts valid protected payload format', () => {
     const validPackage: RentalPackage = {
       id: 'pkg-income-01',
       type: 'income',
       ownerId: 'tenant',
       recipientId: 'manager-a',
       tag: 'income_manager_a',
-      protectedPayload: 'tc_e2ee:v1:income_manager_a:a819fc01:eyJhcHBsaWNhbnQiOiAiQWxleCJ9:9981abf0',
+      protectedPayload: `${SIMULATED_PAYLOAD_PREFIX}income_manager_a:eyJhcHBsaWNhbnQiOiAiQWxleCJ9`,
       createdAt: new Date().toISOString(),
       status: 'active',
     }

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 3000",
     "test": "bun test",
+    "lint": "tsc --noEmit",
     "init": "bash init/tcinit.sh"
   },
   "dependencies": {

@@ -5,13 +5,22 @@ import {
   listPackagesForUser,
   resetPackageStore,
 } from '../../../lib/rental-packages/store'
-import type { RentalPackage, PackageTag, RentalPackageType } from '../../../lib/rental-passport/contracts'
+import {
+  PACKAGE_TAG_MAP,
+  SIMULATED_PAYLOAD_PREFIX,
+  type RentalPackage,
+  type PackageTag,
+  type RentalPackageType,
+} from '../../../lib/rental-passport/contracts'
+
+const MAX_REQUEST_BYTES = 32 * 1024 // 32 KB max request size
+const ALLOWED_BODY_FIELDS = new Set(['type', 'recipientId', 'tag', 'protectedPayload'])
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const session = await serverSessionVerifier.verifyRequest(request)
   if (!session) {
     return NextResponse.json(
-      { error: 'Unauthorized: Missing or invalid TideCloak bearer token' },
+      { error: 'Unauthorized: Missing or invalid session' },
       { status: 401 },
     )
   }
@@ -21,10 +30,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Point 7: Check request size
+  const contentLength = request.headers.get('content-length')
+  if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_BYTES) {
+    return NextResponse.json(
+      { error: 'Payload too large: Request exceeds 32KB limit' },
+      { status: 413 },
+    )
+  }
+
   const session = await serverSessionVerifier.verifyRequest(request)
   if (!session) {
     return NextResponse.json(
-      { error: 'Unauthorized: Missing or invalid TideCloak bearer token' },
+      { error: 'Unauthorized: Missing or invalid session' },
       { status: 401 },
     )
   }
@@ -32,21 +50,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // Only Renter business role is authorized to submit new rental applications
   if (session.businessRole !== 'renter') {
     return NextResponse.json(
-      { error: 'Forbidden: Only tenants with renter business role can create rental packages' },
+      { error: 'Forbidden: Only tenants with renter role can create packages' },
       { status: 403 },
     )
   }
 
   try {
-    const body = await request.json()
+    const rawText = await request.text()
+    if (rawText.length > MAX_REQUEST_BYTES) {
+      return NextResponse.json(
+        { error: 'Payload too large: Request exceeds 32KB limit' },
+        { status: 413 },
+      )
+    }
 
-    // Enforce absence of raw sensitive fields in persistence request
+    const body = JSON.parse(rawText)
+
+    // Point 7: Validate unknown fields
+    for (const key of Object.keys(body)) {
+      if (!ALLOWED_BODY_FIELDS.has(key)) {
+        return NextResponse.json(
+          { error: `Bad request: Unknown field '${key}' is not permitted` },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Point 7: Check for plaintext leakage
     const forbiddenKeys = ['monthlyIncome', 'employer', 'salary', 'previousProperty', 'referenceName']
     for (const key of forbiddenKeys) {
-      if (key in body) {
+      if (key in body || rawText.includes(`"${key}"`)) {
         return NextResponse.json(
           {
-            error: `Security violation: Plaintext property '${key}' rejected. Payload must be encrypted in browser via TideCloak E2EE before transport.`,
+            error: `Security violation: Plaintext property '${key}' rejected. Payload must be protected before transport.`,
           },
           { status: 400 },
         )
@@ -55,23 +91,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { type, recipientId, tag, protectedPayload } = body
 
-    if (!type || !recipientId || !tag || !protectedPayload) {
+    // Point 7: Strict type, tag, recipient validation
+    if (type !== 'income' && type !== 'reference') {
       return NextResponse.json(
-        { error: 'Bad request: Missing required fields (type, recipientId, tag, protectedPayload)' },
+        { error: `Bad request: Invalid package type '${type}'. Must be 'income' or 'reference'.` },
         { status: 400 },
       )
     }
 
-    // Verify tag matches recipient rule
-    if (type === 'income' && (tag !== 'income_manager_a' || recipientId !== 'manager-a')) {
+    const expectedConfig = PACKAGE_TAG_MAP[type as RentalPackageType]
+    if (tag !== expectedConfig.tag) {
       return NextResponse.json(
-        { error: 'Bad request: Tag and recipient mismatch for income package' },
+        { error: `Bad request: Tag mismatch. Type '${type}' requires tag '${expectedConfig.tag}'.` },
         { status: 400 },
       )
     }
-    if (type === 'reference' && (tag !== 'reference_manager_b' || recipientId !== 'manager-b')) {
+
+    if (recipientId !== expectedConfig.recipientId) {
       return NextResponse.json(
-        { error: 'Bad request: Tag and recipient mismatch for reference package' },
+        { error: `Bad request: Recipient mismatch. Type '${type}' must be sent to '${expectedConfig.recipientId}'.` },
+        { status: 400 },
+      )
+    }
+
+    // Validate protectedPayload structure
+    if (
+      typeof protectedPayload !== 'string' ||
+      protectedPayload.trim().length === 0 ||
+      protectedPayload.length > 16384
+    ) {
+      return NextResponse.json(
+        { error: 'Bad request: protectedPayload must be a non-empty string under 16KB.' },
+        { status: 400 },
+      )
+    }
+
+    if (!protectedPayload.startsWith(SIMULATED_PAYLOAD_PREFIX)) {
+      return NextResponse.json(
+        { error: `Bad request: protectedPayload format invalid. Must begin with '${SIMULATED_PAYLOAD_PREFIX}'.` },
         { status: 400 },
       )
     }
@@ -91,7 +148,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(
       {
-        message: 'Encrypted package stored successfully',
+        message: 'Protected package stored successfully',
         package: {
           id: newPackage.id,
           type: newPackage.type,
@@ -104,20 +161,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 201 },
     )
   } catch (err: any) {
-    console.error('Error processing package creation:', err)
     return NextResponse.json(
-      { error: err?.message || 'Internal server error' },
-      { status: 500 },
+      { error: err?.message || 'Invalid JSON request' },
+      { status: 400 },
     )
   }
 }
 
-// Reset store for clean testing / demo runs
+// Point 6: Restrict DELETE /api/packages to development and Tenant/Admin roles
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Reset endpoint disabled in production' },
+      { status: 403 },
+    )
+  }
+
   const session = await serverSessionVerifier.verifyRequest(request)
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Unauthorized: Session required' }, { status: 401 })
   }
+
+  if (session.businessRole !== 'renter' && session.businessRole !== 'auditor') {
+    return NextResponse.json(
+      { error: 'Forbidden: Only tenant or administrator can reset package store' },
+      { status: 403 },
+    )
+  }
+
   resetPackageStore()
   return NextResponse.json({ message: 'Package store reset to empty' }, { status: 200 })
 }

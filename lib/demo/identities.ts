@@ -2,7 +2,7 @@ import type { DemoIdentityId, IdentitySession } from '../rental-passport/contrac
 
 type DemoIdentity = IdentitySession
 
-// Dynamic QEA governed revocation state
+// Dynamic simulated role revocation state
 let managerAIncomeDecryptionRevoked = false
 
 export function isManagerAIncomeRevoked(): boolean {
@@ -13,25 +13,23 @@ export function setManagerAIncomeRevocation(revoked: boolean): void {
   managerAIncomeDecryptionRevoked = revoked
 }
 
-function createMockJwt(username: string, roles: string[], vuid: string): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
-  const payload = Buffer.from(
-    JSON.stringify({
-      iss: 'http://localhost:8080/realms/rental-passport',
-      sub: `user-${username}`,
-      preferred_username: username,
-      realm_access: { roles },
-      resource_access: {
-        'rental-passport-web': { roles: roles.filter((r) => !r.startsWith('_tide_')) },
-      },
-      vuid,
-      tideuserkey: `tuk-${username}-key`,
-      exp: Math.floor(Date.now() / 1000) + 3600,
-      iat: Math.floor(Date.now() / 1000),
-    }),
-  ).toString('base64url')
-  const signature = Buffer.from(`tidecloak_sig_${username}`).toString('base64url')
-  return `${header}.${payload}.${signature}`
+// In-memory store for opaque demo session tokens
+const sessionStore = new Map<string, { identityId: DemoIdentityId; createdAt: number }>()
+
+export function createDemoSession(identityId: DemoIdentityId): string {
+  const sessionId = `demo_sess_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`
+  sessionStore.set(sessionId, { identityId, createdAt: Date.now() })
+  return sessionId
+}
+
+export function getIdentityFromSessionId(sessionId: string): DemoIdentity | null {
+  const record = sessionStore.get(sessionId)
+  if (!record) return null
+  return findDemoIdentity(record.identityId)
+}
+
+export function invalidateDemoSession(sessionId: string): void {
+  sessionStore.delete(sessionId)
 }
 
 export function getDemoIdentities(): Record<DemoIdentityId, DemoIdentity> {
@@ -57,18 +55,6 @@ export function getDemoIdentities(): Record<DemoIdentityId, DemoIdentity> {
       ],
       roles: ['renter'],
       tideuserkey: 'tuk-tenant-key-771a',
-      token: createMockJwt(
-        'tenant',
-        [
-          'default-roles-rental-passport',
-          'renter',
-          '_tide_income_manager_a.selfencrypt',
-          '_tide_income_manager_a.selfdecrypt',
-          '_tide_reference_manager_b.selfencrypt',
-          '_tide_reference_manager_b.selfdecrypt',
-        ],
-        'vuid-tenant-alex-001',
-      ),
       vuid: 'vuid-tenant-alex-001',
     },
     'manager-a': {
@@ -79,7 +65,6 @@ export function getDemoIdentities(): Record<DemoIdentityId, DemoIdentity> {
       realmRoles: managerARealmRoles,
       roles: ['property-manager'],
       tideuserkey: 'tuk-manager-a-key-882b',
-      token: createMockJwt('manager-a', managerARealmRoles, 'vuid-manager-priya-002'),
       vuid: 'vuid-manager-priya-002',
     },
     'manager-b': {
@@ -94,15 +79,6 @@ export function getDemoIdentities(): Record<DemoIdentityId, DemoIdentity> {
       ],
       roles: ['property-manager'],
       tideuserkey: 'tuk-manager-b-key-993c',
-      token: createMockJwt(
-        'manager-b',
-        [
-          'default-roles-rental-passport',
-          'property-manager',
-          '_tide_reference_manager_b.selfdecrypt',
-        ],
-        'vuid-manager-noah-003',
-      ),
       vuid: 'vuid-manager-noah-003',
     },
     admin: {
@@ -113,7 +89,6 @@ export function getDemoIdentities(): Record<DemoIdentityId, DemoIdentity> {
       realmRoles: ['default-roles-rental-passport', 'auditor'],
       roles: ['auditor'],
       tideuserkey: 'tuk-admin-key-004d',
-      token: createMockJwt('admin', ['default-roles-rental-passport', 'auditor'], 'vuid-admin-jordan-004'),
       vuid: 'vuid-admin-jordan-004',
     },
   }

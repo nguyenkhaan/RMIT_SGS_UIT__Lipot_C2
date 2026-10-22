@@ -16,12 +16,12 @@ export function decidePackageAccess(
   packageType: RentalPackageType,
 ): AccessDecision {
   if (allowedPackageTypes[identityId].includes(packageType)) {
-    return { plaintext: '', source: 'temporary-adapter', status: 'granted' }
+    return { plaintext: '', source: 'simulated-adapter', status: 'granted' }
   }
 
   return {
     reason: 'This account is not assigned to this rental evidence package.',
-    source: 'temporary-adapter',
+    source: 'simulated-adapter',
     status: 'denied',
   }
 }

@@ -10,8 +10,7 @@ export async function GET(): Promise<NextResponse> {
     revoked: isManagerAIncomeRevoked(),
     role: '_tide_income_manager_a.selfdecrypt',
     targetUser: 'manager-a',
-    qeaThreshold: 1,
-    qeaStatus: 'COMMITTED',
+    status: 'COMMITTED',
   })
 }
 
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await serverSessionVerifier.verifyRequest(request)
   if (!session || session.businessRole !== 'auditor') {
     return NextResponse.json(
-      { error: 'Forbidden: Only administrator / auditor role may execute QEA governance changes' },
+      { error: 'Forbidden: Only administrator / auditor role may update policy governance' },
       { status: 403 },
     )
   }
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       role: '_tide_income_manager_a.selfdecrypt',
       targetUser: 'manager-a',
       message:
-        'QEA proposal committed: role _tide_income_manager_a.selfdecrypt removed from manager-a. Renewal required for new token.',
+        'Policy change committed: role _tide_income_manager_a.selfdecrypt removed from manager-a. Renewal required for new session state.',
     })
   } else if (action === 'restore') {
     setManagerAIncomeRevocation(false)

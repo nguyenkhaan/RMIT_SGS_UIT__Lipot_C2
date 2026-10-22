@@ -10,16 +10,13 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
     revoked: boolean
     role: string
     targetUser: string
-    qeaThreshold: number
-    qeaStatus: string
   } | null>(null)
   const [govLoading, setGovLoading] = useState(false)
-  const [testDecryptionId, setTestDecryptionId] = useState<string | null>(null)
   const [testResult, setTestResult] = useState<string | null>(null)
 
   const fetchGovStatus = async () => {
     try {
-      const res = await fetch('/api/governance')
+      const res = await fetch('/api/governance', { credentials: 'same-origin' })
       if (res.ok) {
         const data = await res.json()
         setGovStatus(data)
@@ -39,6 +36,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
       const res = await fetch('/api/governance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ action }),
       })
       if (res.ok) {
@@ -50,7 +48,6 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
   }
 
   const handleAdminAttemptDecrypt = async (pkg: RentalPackage) => {
-    setTestDecryptionId(pkg.id)
     setTestResult(null)
     try {
       await doDecrypt([
@@ -61,7 +58,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
       ])
       setTestResult('UNEXPECTED: Decryption succeeded. Security violation.')
     } catch (err: any) {
-      setTestResult(`🛑 Real TideCloak Policy Denial: ${err.message}`)
+      setTestResult(`🛑 Access Denied: ${err.message}`)
     }
   }
 
@@ -77,7 +74,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
         </div>
         <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem', maxWidth: '780px' }}>
           As an Administrator / Auditor, you have access to operational metadata for auditability, but
-          <strong> zero capability</strong> to decrypt renter evidence payloads. TideCloak E2EE tags strictly protect payloads.
+          <strong> no capability</strong> to decrypt private evidence payloads. Package tags strictly protect payloads.
         </p>
       </div>
 
@@ -103,8 +100,8 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
                   <th style={thStyle}>Type</th>
                   <th style={thStyle}>Owner</th>
                   <th style={thStyle}>Recipient</th>
-                  <th style={thStyle}>E2EE Tag</th>
-                  <th style={thStyle}>Ciphertext Digest</th>
+                  <th style={thStyle}>Tag</th>
+                  <th style={thStyle}>Payload Digest</th>
                   <th style={thStyle}>Admin Decrypt Test</th>
                 </tr>
               </thead>
@@ -150,17 +147,17 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
         )}
       </div>
 
-      {/* Quorum-Enforced Authorization (QEA) & Revocation Panel */}
+      {/* Simulated Policy Governance & Role Revocation Panel */}
       <div className="glass-panel" style={{ padding: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.5rem' }}>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
-            QEA Policy Governance & Role Revocation
+            Policy Governance & Role Revocation
           </h3>
-          <span className="badge badge-tag">Quorum Threshold: 1 Admin</span>
+          <span className="badge badge-tag">Simulated Governance Seam</span>
         </div>
         <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-          TideCloak Quorum-Enforced Authorization governs role assignments and removals. When a role is revoked and
-          committed, the recipient must renew their session; subsequent decryption attempts are permanently denied.
+          When a decrypt role is revoked and committed, the affected recipient must renew their session; subsequent
+          attempts to open the package are denied.
         </p>
 
         {govStatus && (
@@ -168,7 +165,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f8fafc' }}>
-                  Target: <strong>@{govStatus.targetUser}</strong>
+                  Target Account: <strong>@{govStatus.targetUser}</strong>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.2rem' }}>
                   Permission: <code>{govStatus.role}</code>
@@ -178,7 +175,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
               <div>
                 {govStatus.revoked ? (
                   <span className="badge badge-auditor" style={{ background: 'rgba(244, 63, 94, 0.2)', color: '#f43f5e', border: '1px solid #f43f5e' }}>
-                    🛑 REVOKED & COMMITTED
+                    🛑 REVOKED
                   </span>
                 ) : (
                   <span className="badge badge-active">
@@ -195,7 +192,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
                   onClick={() => handleGovernanceAction('revoke')}
                   disabled={govLoading}
                 >
-                  {govLoading ? 'Proposing & Committing...' : 'Submit QEA Revocation (Revoke Role)'}
+                  {govLoading ? 'Updating Policy...' : 'Revoke Role from Manager A'}
                 </button>
               ) : (
                 <button
@@ -209,7 +206,7 @@ export function AdminWorkspace({ packages }: { packages: RentalPackage[] }) {
             </div>
 
             <div style={limitationBoxStyle}>
-              ⚠️ <strong>Cryptographic Principle:</strong> Revocation prevents future authorised decryption after the
+              ⚠️ <strong>Security Principle:</strong> Revocation prevents future authorised decryption after the
               governance change is committed and the session is renewed. It cannot retrospectively recall or erase
               plaintext data already viewed or downloaded by the recipient.
             </div>

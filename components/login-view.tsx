@@ -17,7 +17,7 @@ const DEMO_ACCOUNTS: Array<{
     id: 'tenant',
     name: 'Alex Morgan',
     role: 'renter',
-    description: 'Tenant applicant: prepares and encrypts both evidence packs; can decrypt both.',
+    description: 'Tenant applicant: prepares and protects both evidence packages; authorized for both.',
     badgeClass: 'badge-renter',
     tags: ['income_manager_a', 'reference_manager_b'],
     icon: '👤',
@@ -26,25 +26,25 @@ const DEMO_ACCOUNTS: Array<{
     id: 'manager-a',
     name: 'Priya Shah',
     role: 'property-manager',
-    description: 'Property Manager A: decrypts only Income Pack; TideCloak denies Reference Pack.',
+    description: 'Property Manager A: authorized for Income Pack; denied for Reference Pack.',
     badgeClass: 'badge-manager',
-    tags: ['income_manager_a (decrypt only)'],
+    tags: ['income_manager_a (decrypt role)'],
     icon: '🏢',
   },
   {
     id: 'manager-b',
     name: 'Noah Williams',
     role: 'property-manager',
-    description: 'Property Manager B: decrypts only Reference Pack; TideCloak denies Income Pack.',
+    description: 'Property Manager B: authorized for Reference Pack; denied for Income Pack.',
     badgeClass: 'badge-manager',
-    tags: ['reference_manager_b (decrypt only)'],
+    tags: ['reference_manager_b (decrypt role)'],
     icon: '🏘️',
   },
   {
     id: 'admin',
     name: 'Jordan Lee',
     role: 'auditor',
-    description: 'Administrator: inspects package metadata; TideCloak denies payload decryption.',
+    description: 'Administrator: inspects package metadata; payload access is restricted.',
     badgeClass: 'badge-auditor',
     tags: ['Metadata only (No decrypt roles)'],
     icon: '🛡️',
@@ -71,12 +71,12 @@ export function LoginView({ onClose }: { onClose?: () => void }) {
       <div className="glass-panel" style={modalCardStyle}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-          <div style={tideBadgeStyle}>TideCloak OIDC Realm: rental-passport</div>
+          <div style={tideBadgeStyle}>Target Realm: rental-passport</div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginTop: '0.5rem' }}>
-            Choose Demo Identity
+            Select Demo Identity
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem' }}>
-            Sign in as one of the 4 independent TideCloak accounts to observe selective E2EE disclosure.
+            Choose an identity to test the selective access control matrix across independent roles.
           </p>
         </div>
 
@@ -137,7 +137,7 @@ export function LoginView({ onClose }: { onClose?: () => void }) {
         {/* Security boundary note */}
         <div style={securityFooterStyle}>
           🔒 <strong>Zero Trust Architecture:</strong> No master admin key or backend decryption capability exists.
-          Decryption permissions are issued and enforced solely by TideCloak Realm Roles.
+          Decryption permissions are enforced through tag-bound role checks at the integration seam.
         </div>
       </div>
     </div>

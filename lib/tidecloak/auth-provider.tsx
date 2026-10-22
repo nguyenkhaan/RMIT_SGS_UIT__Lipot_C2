@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import type { DemoIdentityId, IdentitySession } from '../rental-passport/contracts'
+import { SIMULATED_PAYLOAD_PREFIX } from '../rental-passport/contracts'
 
 export interface TideCloakContextValue {
   isInitializing: boolean
   authenticated: boolean
   user: IdentitySession | null
-  token: string | null
   login: (identityId?: DemoIdentityId) => Promise<void>
   logout: () => Promise<void>
   renewSession: () => Promise<void>
@@ -26,25 +26,22 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
   const [isInitializing, setIsInitializing] = useState(true)
   const [authenticated, setAuthenticated] = useState(false)
   const [user, setUser] = useState<IdentitySession | null>(null)
-  const [token, setToken] = useState<string | null>(null)
 
   const syncSession = useCallback(async () => {
     try {
-      const res = await fetch('/api/session')
+      const res = await fetch('/api/session', { credentials: 'same-origin' })
       if (res.ok) {
         const data = await res.json()
         if (data.authenticated && data.session) {
           setUser(data.session)
           setAuthenticated(true)
-          setToken(data.session.token)
           return
         }
       }
       setUser(null)
       setAuthenticated(false)
-      setToken(null)
     } catch (e) {
-      console.error('Failed to sync TideCloak session:', e)
+      console.error('Failed to sync demo session:', e)
     } finally {
       setIsInitializing(false)
     }
@@ -61,15 +58,15 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
         const res = await fetch('/api/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({ identityId }),
         })
         if (!res.ok) {
-          throw new Error('Failed to authenticate against realm rental-passport')
+          throw new Error('Failed to establish demo session')
         }
         const data = await res.json()
         setUser(data.session)
         setAuthenticated(true)
-        setToken(data.session.token)
       } finally {
         setIsInitializing(false)
       }
@@ -80,10 +77,9 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
   const logout = useCallback(async () => {
     setIsInitializing(true)
     try {
-      await fetch('/api/session', { method: 'DELETE' })
+      await fetch('/api/session', { method: 'DELETE', credentials: 'same-origin' })
       setUser(null)
       setAuthenticated(false)
-      setToken(null)
     } finally {
       setIsInitializing(false)
     }
@@ -123,21 +119,21 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
 
   const getValueFromIdToken = getValueFromToken
 
-  // TideCloak Browser E2EE Encrypt
+  // Simulated browser package protection
   const doEncrypt = useCallback(
     async (items: Array<{ data: string | Uint8Array; tags: string[] }>): Promise<string[]> => {
       if (!authenticated || !user) {
-        throw new Error('TideCloak E2EE Error: User must be signed in to perform encryption.')
+        throw new Error('Access Error: User must be signed in to protect package payload.')
       }
 
-      const ciphertexts: string[] = []
+      const payloads: string[] = []
 
       for (const item of items) {
         const tag = item.tags[0]
         const requiredRole = `_tide_${tag}.selfencrypt`
         if (!hasRealmRole(requiredRole)) {
           throw new Error(
-            `TideCloak Policy Denial: Active session '${user.identityId}' lacks encryption role '${requiredRole}' for tag '${tag}'.`,
+            `Policy Denial: Active account '${user.identityId}' lacks encryption role '${requiredRole}' for tag '${tag}'.`,
           )
         }
 
@@ -146,34 +142,22 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
             ? item.data
             : new TextDecoder().decode(item.data)
 
-        // Generate synthetic cryptographic salt & iv for simulation
-        const iv = Array.from({ length: 12 }, () =>
-          Math.floor(Math.random() * 256)
-            .toString(16)
-            .padStart(2, '0'),
-        ).join('')
-        const tagSig = Array.from({ length: 16 }, () =>
-          Math.floor(Math.random() * 256)
-            .toString(16)
-            .padStart(2, '0'),
-        ).join('')
-
-        // Encode to base64url payload
+        // Point 5: Encode payload using simulated prefix
         const base64Data = btoa(unescape(encodeURIComponent(dataStr)))
-        const ciphertext = `tc_e2ee:v1:${tag}:${iv}:${base64Data}:${tagSig}`
-        ciphertexts.push(ciphertext)
+        const protectedPayload = `${SIMULATED_PAYLOAD_PREFIX}${tag}:${base64Data}`
+        payloads.push(protectedPayload)
       }
 
-      return ciphertexts
+      return payloads
     },
     [authenticated, user, hasRealmRole],
   )
 
-  // TideCloak Browser E2EE Decrypt
+  // Simulated browser package decryption
   const doDecrypt = useCallback(
     async (items: Array<{ encrypted: string; tags: string[] }>): Promise<string[]> => {
       if (!authenticated || !user) {
-        throw new Error('TideCloak E2EE Error: User must be signed in to perform decryption.')
+        throw new Error('Access Error: User must be signed in to decrypt package payload.')
       }
 
       const results: string[] = []
@@ -185,18 +169,23 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
         // Check if the current user possesses the required decrypt role
         if (!hasRealmRole(requiredRole)) {
           throw new Error(
-            `TideCloak E2EE Policy Denial: Active session '${user.identityId}' lacks required realm role '${requiredRole}' for tag '${tag}'.`,
+            `Policy Denial: Active account '${user.identityId}' lacks required decrypt role '${requiredRole}' for tag '${tag}'.`,
           )
         }
 
-        const parts = item.encrypted.split(':')
-        if (parts.length >= 6 && parts[0] === 'tc_e2ee' && parts[1] === 'v1') {
-          const base64Data = parts[4]
-          const plaintext = decodeURIComponent(escape(atob(base64Data)))
-          results.push(plaintext)
-        } else {
-          throw new Error('TideCloak E2EE Error: Invalid ciphertext structure or tag integrity failure.')
+        // Point 5: Unpack simulated payload
+        if (item.encrypted.startsWith(SIMULATED_PAYLOAD_PREFIX)) {
+          const rest = item.encrypted.substring(SIMULATED_PAYLOAD_PREFIX.length)
+          const colonIdx = rest.indexOf(':')
+          if (colonIdx !== -1) {
+            const base64Data = rest.substring(colonIdx + 1)
+            const plaintext = decodeURIComponent(escape(atob(base64Data)))
+            results.push(plaintext)
+            continue
+          }
         }
+
+        throw new Error('Access Error: Invalid payload structure or tag integrity check failure.')
       }
 
       return results
@@ -206,13 +195,9 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
 
   const secureFetch = useCallback(
     async (url: string, init: RequestInit = {}): Promise<Response> => {
-      const headers = new Headers(init.headers || {})
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`)
-      }
-      return fetch(url, { ...init, headers })
+      return fetch(url, { ...init, credentials: 'same-origin' })
     },
-    [token],
+    [],
   )
 
   return (
@@ -221,7 +206,6 @@ export function TideCloakAuthProvider({ children }: { children: React.ReactNode 
         isInitializing,
         authenticated,
         user,
-        token,
         login,
         logout,
         renewSession,

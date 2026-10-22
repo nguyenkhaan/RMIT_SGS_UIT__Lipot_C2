@@ -10,44 +10,32 @@ import { AdminWorkspace } from '../components/admin-workspace'
 import type { RentalPackage } from '../lib/rental-passport/contracts'
 
 export default function HomePage() {
-  const { authenticated, isInitializing, user, token } = useTideAuth()
+  const { authenticated, isInitializing, user } = useTideAuth()
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [packages, setPackages] = useState<RentalPackage[]>([])
-  const [allPackages, setAllPackages] = useState<RentalPackage[]>([])
   const [loadingPackages, setLoadingPackages] = useState(false)
 
   const fetchPackages = useCallback(async () => {
-    if (!token) {
+    if (!authenticated) {
       setPackages([])
-      setAllPackages([])
       return
     }
 
     setLoadingPackages(true)
     try {
       const res = await fetch('/api/packages', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'same-origin',
       })
       if (res.ok) {
         const data = await res.json()
         setPackages(data.packages || [])
-
-        // If user is auditor, packages list has all packages.
-        if (user?.businessRole === 'auditor') {
-          setAllPackages(data.packages || [])
-        } else {
-          // Also fetch all packages for managers cross-package test
-          setAllPackages(data.packages || [])
-        }
       }
     } catch (e) {
       console.error('Failed to load packages:', e)
     } finally {
       setLoadingPackages(false)
     }
-  }, [token, user])
+  }, [authenticated])
 
   useEffect(() => {
     if (authenticated) {
@@ -59,7 +47,7 @@ export default function HomePage() {
     if (!confirm('Reset package store to empty state for a fresh demonstration?')) return
     await fetch('/api/packages', {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'same-origin',
     })
     fetchPackages()
   }
@@ -69,7 +57,7 @@ export default function HomePage() {
       <div style={loadingContainerStyle}>
         <div style={spinnerStyle} />
         <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '1rem' }}>
-          Connecting to TideCloak Realm <strong>rental-passport</strong>...
+          Loading demo session...
         </div>
       </div>
     )
@@ -84,7 +72,7 @@ export default function HomePage() {
           /* Signed Out Hero / Landing View */
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '4rem 1rem' }}>
             <div style={taglineBadgeStyle}>
-              UNLOCKED Challenge • Prototype Verification
+              UNLOCKED Challenge • Integration Prototype
             </div>
 
             <h1 style={heroTitleStyle}>
@@ -93,8 +81,8 @@ export default function HomePage() {
 
             <p style={heroSubtextStyle}>
               Eliminate the renter trust bottleneck. Instead of giving complete plaintext copies of private payslips and rental
-              histories to every recipient and platform administrator, data is encrypted browser-to-browser with TideCloak E2EE tags.
-              Authority derives strictly from TideCloak Realm Roles.
+              histories to every recipient and platform administrator, data is protected with tag-based selective authority.
+              Decryption is constrained strictly by recipient realm roles.
             </p>
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
@@ -103,7 +91,7 @@ export default function HomePage() {
                 onClick={() => setShowLoginModal(true)}
                 style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}
               >
-                Sign In with TideCloak Account
+                Select Demo Identity
               </button>
             </div>
 
@@ -162,7 +150,7 @@ export default function HomePage() {
             )}
 
             {user?.businessRole === 'property-manager' && (
-              <ManagerWorkspace packages={packages} allPackages={allPackages} />
+              <ManagerWorkspace packages={packages} allPackages={packages} />
             )}
 
             {user?.businessRole === 'auditor' && (
@@ -176,14 +164,14 @@ export default function HomePage() {
       <footer style={footerStyle}>
         <div style={footerContainerStyle}>
           <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-            <span>Verification Standard: </span>
+            <span>Policy Matrix: </span>
             <span style={{ color: '#10b981', fontWeight: 600 }}>Tenant [Allow/Allow]</span> •{' '}
             <span style={{ color: '#38bdf8', fontWeight: 600 }}>Manager A [Allow/Deny]</span> •{' '}
             <span style={{ color: '#a78bfa', fontWeight: 600 }}>Manager B [Deny/Allow]</span> •{' '}
             <span style={{ color: '#f59e0b', fontWeight: 600 }}>Admin [Deny/Deny + Audit]</span>
           </div>
 
-          {authenticated && (
+          {authenticated && (user?.businessRole === 'renter' || user?.businessRole === 'auditor') && (
             <button
               className="btn btn-secondary"
               onClick={handleResetDemo}

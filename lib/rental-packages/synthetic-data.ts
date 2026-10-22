@@ -1,4 +1,4 @@
-import type { PackageTag, RentalPackageType } from '../rental-passport/contracts'
+import { PACKAGE_TAG_MAP } from '../rental-passport/contracts'
 
 export interface IncomePayload {
   applicantName: string
@@ -34,25 +34,5 @@ export const SYNTHETIC_REFERENCE_DATA: ReferencePayload = {
   paymentHistory: 'Paid on time',
 }
 
-export const TAG_MAPPING: Record<
-  RentalPackageType,
-  {
-    tag: PackageTag
-    recipientId: string
-    recipientName: string
-    requiredDecryptRole: string
-  }
-> = {
-  income: {
-    tag: 'income_manager_a',
-    recipientId: 'manager-a',
-    recipientName: 'Manager A (Priya Shah)',
-    requiredDecryptRole: '_tide_income_manager_a.selfdecrypt',
-  },
-  reference: {
-    tag: 'reference_manager_b',
-    recipientId: 'manager-b',
-    recipientName: 'Manager B (Noah Williams)',
-    requiredDecryptRole: '_tide_reference_manager_b.selfdecrypt',
-  },
-}
+// Re-export single source of truth from contracts
+export const TAG_MAPPING = PACKAGE_TAG_MAP
