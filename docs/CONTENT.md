@@ -15,7 +15,7 @@ phase-by-phase implementation plans live under `plans/`.
 | 5 | [tidecloak-integration.md](tidecloak-integration.md) | Gives the official-doc-backed TideCloak setup and integration contract. |
 | 6 | [demo-guide.md](demo-guide.md) | Defines the two-minute story, preflight checks, and observable acceptance scenarios. |
 | 7 | [decisions/ADR-001-core-architecture.md](decisions/ADR-001-core-architecture.md) | Records why Next.js, real TideCloak, browser E2EE, and minimal storage were chosen. |
-| 8 | [decisions/ADR-002-temporary-mock-mvp-bridge.md](decisions/ADR-002-temporary-mock-mvp-bridge.md) | Records the temporary, visibly marked mock bridge and its TideCloak replacement boundary. |
+| 8 | [decisions/ADR-002-temporary-mock-mvp-bridge.md](decisions/ADR-002-temporary-mock-mvp-bridge.md) | Records the temporary mock bridge and its TideCloak replacement boundary. |
 | 9 | [plans/README.md](plans/README.md) | Maps dependencies, timebox, phase order, full-stack delivery model, and project-wide Definition of Done. |
 | 10 | [guide-pland.md](guide-pland.md) | Assigns the two-person team, defines Bun commands, and records cross-phase handoffs. |
 | 11 | This document | Provides navigation and document governance. |
@@ -72,8 +72,9 @@ this recovery path on 2026-10-22 while a third party repairs TideCloak.
 
 - The mock MVP uses the intended Next.js/TypeScript/Bun frontend and backend
   technologies, with an explicit TideCloak integration seam.
-- Every mock screen and result must visibly state that it is not real TideCloak
-  authentication, E2EE, policy enforcement, or submission evidence.
+- By direct user decision, the UI does not show a mock-mode label. It still must
+  not claim real TideCloak authentication, E2EE, policy enforcement, or
+  submission evidence.
 - Real TideCloak enrolment, generated configuration, token verification, and
   E2EE remain required before claiming the Challenge acceptance criteria.
 - The mock-MVP plan is [`plans/00-mock-mvp-bridge.md`](plans/00-mock-mvp-bridge.md).

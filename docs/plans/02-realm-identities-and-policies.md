@@ -31,6 +31,15 @@ Tide IdP, license và trạng thái QEA thay vì tạo cấu hình trùng lặp.
 `docs/tidecloak-integration.md` nếu generated identifiers khác spec  
 **Estimated scope:** S
 
+### Temporary-MVP implementation note
+
+While TideCloak is repaired, the app may simulate this matrix through the
+temporary server-side session and access-decision adapters documented in
+`plans/00-mock-mvp-bridge.md`. This helps implement and verify UI/API contracts,
+but does **not** satisfy P2.1 or any Phase 2 acceptance criterion. The real
+realm, client, Tide IdP, licence, QEA state, and redirect/origin approvals
+remain unchecked until TideCloak is available.
+
 ## Task P2.2 — Tạo bốn demo account và business roles
 
 **Mô tả:** Tạo/enrol `tenant`, `manager-a`, `manager-b`, `admin` như bốn realm

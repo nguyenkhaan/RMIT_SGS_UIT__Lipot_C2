@@ -2,16 +2,17 @@
 
 ## 1. Purpose
 
-This document defines the minimum real TideCloak integration required by the prototype. It is based on official Tide documentation checked on 2026-10-22. Generated code and current official documentation must be rechecked during implementation because no `package.json` exists yet.
+This document defines the minimum real TideCloak integration required by the prototype. It is based on official Tide documentation checked on 2026-10-22. A generated baseline now exists at the repository root; its provider, redirect route, proxy, token verifier, and adapter patterns must still be rechecked against current official documentation and a running local service before the real integration is claimed.
 
 ## Temporary Mock-MVP Bridge
 
 TideCloak is currently being repaired by a third party. By direct project
-decision, the app may temporarily use a mock identity adapter and a mock package
-protection adapter to build the Next.js frontend and route-handler flow. This is
-not an alternative integration: it must be visibly labelled `MOCK MODE —
-TideCloak integration pending`, has no security claim, and is not valid E2EE,
-token-verification, or Challenge acceptance evidence.
+decision, the app may temporarily use an identity adapter and package-protection
+adapter to build the Next.js frontend and route-handler flow. This is not an
+alternative integration, has no security claim, and is not valid E2EE,
+token-verification, or Challenge acceptance evidence. The UI does not display a
+mock-mode label, but it must not present temporary results as real TideCloak
+results.
 
 Keep these boundaries stable so the real integration is a swap rather than a UI
 rewrite: the browser identity adapter, browser package-protection adapter,
@@ -20,6 +21,13 @@ points. When TideCloak is available, use the official existing-Next.js tutorial
 to add `@tidecloak/nextjs`, then replace the bridge with the generated provider,
 redirect route, proxy/middleware, server verifier, and `doEncrypt` / `doDecrypt`
 calls. Do not retain mock mode for the real acceptance run.
+
+The SDK defaults to fetching `/adapter.json` when its supplied configuration
+does not contain a server URL or realm. The placeholder `tidecloak.json` is
+therefore deliberately gated out of `TideCloakProvider` until Phase 2.1 exports
+the real adapter JSON from Tide Console. Do not create an invented adapter file
+to silence this error; use the real downloaded adapter only after checking it
+contains no confidential client material.
 
 ## 2. Official Starting Point
 

@@ -30,10 +30,10 @@ The prototype uses four separate TideCloak accounts: renter, Manager A, Manager 
 ## Status
 
 TideCloak is being repaired by a third party. The project is therefore building
-a temporary, visibly labelled mock MVP on the same Next.js frontend and
-route-handler backend architecture. It is an integration harness only—not real
-TideCloak authentication, E2EE, or Challenge acceptance evidence. The migration
-contract is documented in [`docs/plans/00-mock-mvp-bridge.md`](docs/plans/00-mock-mvp-bridge.md).
+a temporary MVP on the same Next.js frontend and route-handler backend
+architecture. It is an integration harness only—not real TideCloak
+authentication, E2EE, or Challenge acceptance evidence. The migration contract
+is documented in [`docs/plans/00-mock-mvp-bridge.md`](docs/plans/00-mock-mvp-bridge.md).
 
 ## Setup
 
@@ -54,4 +54,15 @@ The local TideCloak service is declared in `docker-compose.yaml`. Follow the
 password-safe startup instructions in [docs/tidecloak-integration.md](docs/tidecloak-integration.md);
 do not put a bootstrap password in the repository.
 
-Do not treat the repository as runnable until `package.json` exists and the setup instructions have been verified against it.
+The generated manifest currently exposes these commands:
+
+```powershell
+bun install
+bun --bun run dev
+bun --bun run test
+bun --bun run build
+```
+
+No `lint` script exists yet. Do not report it as passing until it has been
+deliberately added and run. The application remains a temporary integration
+harness until the real TideCloak flow is verified.

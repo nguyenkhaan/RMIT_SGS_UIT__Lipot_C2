@@ -1,4 +1,4 @@
-# ADR-002: Use a visibly marked mock bridge while TideCloak is repaired
+# ADR-002: Use a temporary bridge while TideCloak is repaired
 
 ## Status
 
@@ -12,10 +12,11 @@ presenting simulated access behaviour as the product's cryptographic proof.
 
 ## Decision
 
-Build a minimal mock-MVP bridge with two replaceable contracts: identity and
-package protection. The UI must permanently display `MOCK MODE — TideCloak
-integration pending`. Domain models, API shapes, access-decision states, and
-package tags remain compatible with the intended real integration.
+Build a minimal temporary bridge with two replaceable contracts: identity and
+package protection. By direct user decision, the UI does not display a
+mock-mode label. Domain models, API shapes, access-decision states, and package
+tags remain compatible with the intended real integration, and no temporary
+result is presented as real TideCloak security evidence.
 
 Use a Bun-generated Next.js App Router baseline temporarily. When TideCloak is
 healthy, use the official existing-Next.js tutorial to add the SDK and replace
