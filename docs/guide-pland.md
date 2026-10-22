@@ -4,8 +4,9 @@
 
 > **Temporary mock-MVP override (2026-10-22):** Khi TideCloak được bên thứ ba
 > sửa, nhóm được phép thực hiện `plans/00-mock-mvp-bridge.md` trên Next.js App
-> Router. Đây là mock được gắn nhãn bắt buộc, không phải kết quả security hoặc
-> acceptance. Khi service sẵn sàng, quay lại sequence real TideCloak bên dưới.
+> Router. Đây không phải kết quả security hoặc acceptance. Theo quyết định của
+> user, UI không hiển thị nhãn mock-mode. Khi service sẵn sàng, quay lại
+> sequence real TideCloak bên dưới.
 
 File này là guide vận hành duy nhất bổ sung cho bộ phase plan hiện có. Nó phân
 công hai người theo module/feature, chỉ ra dependency bằng **Chờ**, và thiết lập

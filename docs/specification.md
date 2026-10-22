@@ -8,19 +8,20 @@ The prototype is successful when the same ciphertext is handled by the applicati
 
 ### Temporary mock-MVP mode
 
-While TideCloak is repaired, the project may ship a visibly marked workflow MVP
+While TideCloak is repaired, the project may ship a temporary workflow MVP
 using simulated identities and outcomes. It is a UI/API integration harness,
 not a security proof: it must never claim encryption, real authentication, or
-cryptographic selective decryption. The mock boundary is replaced by the
-generated TideCloak provider, token verifier, and E2EE helpers as soon as the
-service is available.
+cryptographic selective decryption. By direct user decision, the UI does not
+render a mock-mode label; the documentation remains explicit about this
+limitation. The temporary boundary is replaced by the generated TideCloak
+provider, token verifier, and E2EE helpers as soon as the service is available.
 
 ## 2. Assumptions
 
 1. Docker CLI is available; Docker Desktop is optional.
 2. The implementation machine has internet access during Tide enrolment and E2EE operations.
 3. The official TideCloak initializer remains the supported starting point for Next.js.
-4. Exact package versions are unknown until scaffolding. The generated `package.json` and `bun.lock` will become the version source of truth.
+4. The Phase 1 scaffold was generated with Node.js `v26.12.0`. Its lockfile resolves Next.js `16.4.2`, React and React DOM `19.3.1`, TypeScript `5.8.3`, `@types/node` `24.0.13`, and `@types/react` `19.1.8`. The root manifest deliberately keeps the generated compatible ranges for Next.js and React; `bun.lock` is the reproducible version source of truth.
 5. Synthetic JSON/document previews are sufficient; no binary file upload is needed.
 6. Four separate TideCloak accounts are available before recording the demo.
 7. The seven-hour limit applies to implementation and demo preparation, so every optional feature must yield to the access-control story.
@@ -55,7 +56,16 @@ with Bun while the official initializer is blocked. Tide's official tutorial
 documents adding `@tidecloak/nextjs` to an existing App Router application, so
 this is an intentional bridge rather than a permanent framework fork.
 
-No exact Next.js, React, Node package, or SDK version is pinned in this document because the repository has not been scaffolded. Do not invent versions. Record the generated versions after initialization.
+The generated scaffold is now present. The generated SDK dependency remains in
+`package.json`, but this specification intentionally does not rely on a
+specific TideCloak SDK API or version until the official existing-app
+integration is verified against the running service.
+
+The checked-in `tidecloak.json` is an empty placeholder, not an adapter. The
+root layout must not mount `TideCloakProvider` until a downloaded adapter has
+the server URL, realm, and client resource required by the SDK. This prevents
+the SDK's default `/adapter.json` request while Phase 2.1 establishes the real
+realm and client.
 
 ## 5. Commands
 
@@ -82,16 +92,40 @@ chosen scaffold path. Tide's official quickstart publishes the npm spelling of
 this initializer; the Bun equivalent and its verification rule are recorded in
 `docs/guide-pland.md`.
 
-### Expected repository commands after scaffolding
+### Verified generated repository commands
 
 ```powershell
 bun install
 bun --bun run dev
-bun --bun run lint
+bun --bun run test
 bun --bun run build
 ```
 
-There is no test script yet. Do not document or report `bun test` as passing until a test runner and script actually exist in `package.json`.
+The generated manifest also provides `bun --bun run start` and
+`bun --bun run init`. The project uses Bun's built-in test runner for the
+adapter-configuration gate and does not yet provide a `lint` script. Do not
+report lint as passing until the corresponding tooling and script exist.
+
+### Temporary mock replacement contract
+
+The temporary bridge owns the typed `IdentitySession`, `IdentityGateway`,
+`PackageProtectionGateway`, `SessionVerifier`, `RentalPackage`,
+`PackageMetadata`, and `AccessDecision` contracts. Mock implementations may
+return only simulated outcomes and must identify them as mock results. The real
+integration replaces the identity gateway with the generated provider/redirect
+flow, the server verifier with TideCloak token verification, and the protection
+gateway with browser `doEncrypt` and `doDecrypt` calls. Until the swap is
+verified, UI copy must not present any temporary outcome as authentication,
+encryption, or policy enforcement.
+
+For the approved temporary runtime, `POST /api/demo-session` creates an opaque,
+HTTP-only local session for one of the four published demo identities and
+`DELETE /api/demo-session` removes it. `GET /api/packages` and
+`POST /api/packages/:id/access` verify that session on the server before
+returning safe metadata or a simulated access decision. This is a swap seam,
+not an authorization claim: real TideCloak replaces the session route with its
+provider/session, verifies a token server-side, and makes the decrypt decision
+at the E2EE boundary.
 
 ## 6. Target Project Structure
 
@@ -157,8 +191,8 @@ Run the full identity/package matrix from `requirement.md` using real TideCloak 
 - Lint the application with the script generated or configured in `package.json`.
 - Produce a successful production build.
 - Confirm no secret or plaintext package appears in tracked files or console logs.
-- In mock mode, confirm the persistent mock notice is visible and that no test
-  result is called a TideCloak or E2EE result.
+- In temporary mode, confirm the UI contains no claim that a test result is a
+  TideCloak or E2EE result.
 
 ### Automated tests
 
@@ -193,7 +227,8 @@ The TideCloak integration is verified manually against the running dev container
 - Give Admin a package decrypt role.
 - Treat hidden UI as authorization.
 - Fall back to mock auth/E2EE in the submitted demo.
-- Hide or make the mock-mode label dismissible.
+- Present temporary outcomes as real TideCloak authentication, E2EE, or policy
+  enforcement.
 - Claim that revocation erases information already viewed.
 - Claim that a one-admin QEA realm demonstrates multi-party approval.
 
@@ -211,11 +246,10 @@ The TideCloak integration is verified manually against the running dev container
 - [ ] Lint and production build pass.
 - [ ] README challenge overview remains under 300 words.
 - [ ] The complete story can be recorded in under two minutes.
-- [ ] The temporary mock MVP, if used, is visibly marked and described only as
-  an integration harness.
+- [ ] The temporary MVP, if used, is documented only as an integration harness
+  and makes no real TideCloak/E2EE claim in the UI.
 
 ## 11. Open Verification Items
 
-- Record exact generated dependency versions after scaffolding.
-- Verify the generated redirect path, provider name, middleware API, and token-verification helper before writing application code around them.
+- Verify the generated redirect path, provider name, middleware API, and token-verification helper against the running service before writing real TideCloak application logic around them.
 - Decide during planning whether a multi-admin QEA demonstration fits the timebox. It is not required for the four-user selective-decryption loop.

@@ -60,10 +60,17 @@ after each shared contract is fixed.
 Until TideCloak is healthy, the app uses two narrow adapters: an identity
 adapter for the active demo identity and a package-protection adapter for the
 simulated allow/deny result. They expose the same domain outputs needed by the
-UI and route handlers, but they provide **no security guarantee**. A persistent
-mock-mode notice prevents their results from being mistaken for TideCloak
-authentication or E2EE. The production-target implementation replaces these
-adapters with the SDK provider, token verifier, `doEncrypt`, and `doDecrypt`.
+UI and route handlers, but they provide **no security guarantee**. The UI does
+not display a mock-mode notice by direct user decision, so temporary results
+must not be written or presented as TideCloak authentication or E2EE. The
+production-target implementation replaces these adapters with the SDK provider,
+token verifier, `doEncrypt`, and `doDecrypt`.
+
+The temporary identity adapter issues an opaque HTTP-only server session after a
+visible demo-account selection. Package-list and access-decision route handlers
+resolve the session server-side; the browser never supplies a role as authority.
+This mirrors the location of the future token-verification boundary without
+claiming that the temporary session is a TideCloak credential.
 
 ### Ciphertext store
 

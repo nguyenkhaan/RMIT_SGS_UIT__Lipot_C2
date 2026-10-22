@@ -4,8 +4,8 @@
 
 This user-approved phase keeps delivery moving while a third party repairs
 TideCloak. It builds a working Next.js frontend and route-handler backend
-workflow, but it is **not** a TideCloak or E2EE implementation. Every page must
-show `MOCK MODE — TideCloak integration pending`; no payload is called
+workflow, but it is **not** a TideCloak or E2EE implementation. By direct user
+decision, the UI does not display a mock-mode label; no payload is called
 ciphertext and no allow/deny outcome is called policy enforcement.
 
 The phase is successful only when its adapters can be replaced by the official
@@ -41,15 +41,17 @@ Define `RentalPackage`, `PackageMetadata`, `AccessDecision`, `IdentitySession`,
 
 ## M0.3 — Mock identity and API session
 
-Implement a clearly labelled mock login/logout flow for the four named demo
-identities and a route-handler session verifier. The mock selector is permitted
-only because it is visible and permanently labelled.
+Implement a visible demo-account sign-in/sign-out flow for the four named demo
+identities and a route-handler session verifier. The selector is only a
+temporary identity seam and is replaced by TideCloak login when the real adapter
+is available.
 
 **Acceptance criteria:**
 
-- [ ] The active mock identity is visible.
+- [ ] The active demo identity is visible.
 - [ ] Unauthenticated API requests fail.
-- [ ] Mock session information has a single server-side verification boundary.
+- [ ] An opaque HTTP-only demo session has a single server-side verification
+  boundary.
 
 ## M0.4 — Package workflow and simulated decisions
 
@@ -60,7 +62,7 @@ the protection gateway.
 **Acceptance criteria:**
 
 - [ ] The matrix mirrors the intended tenant/manager/admin workflow.
-- [ ] Every simulated result says `Mock result`, never `TideCloak result`.
+- [ ] No temporary result is presented as a TideCloak result.
 - [ ] No logging or browser persistence of draft plaintext is introduced.
 
 ## M0.5 — TideCloak swap checklist

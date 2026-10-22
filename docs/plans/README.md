@@ -3,9 +3,10 @@
 ## Trạng thái và phạm vi
 
 Bộ tài liệu này đã được người dùng duyệt cho **temporary mock-MVP
-implementation** trong khi TideCloak được bên thứ ba sửa. Mock MVP chỉ là một
-integration harness, không thay thế real TideCloak acceptance; mọi màn hình và
-kết quả mock phải được gắn nhãn rõ ràng.
+implementation** trong khi TideCloak được bên thứ ba sửa. Temporary MVP chỉ là
+một integration harness, không thay thế real TideCloak acceptance; theo quyết
+định user, UI không hiển thị nhãn mock-mode và không được trình bày kết quả là
+TideCloak thật.
 
 Mục tiêu là hoàn thiện prototype trong tối đa bảy giờ, dùng một Next.js project
 cho cả frontend và backend. Mỗi capability được giao theo vertical feature

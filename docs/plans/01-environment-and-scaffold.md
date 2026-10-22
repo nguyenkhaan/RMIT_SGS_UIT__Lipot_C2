@@ -90,15 +90,15 @@ Khi TideCloak sẵn sàng, tích hợp SDK theo `docs/tidecloak-integration.md`.
 
 **Acceptance criteria:**
 
-- [ ] Dùng `bun create next-app@latest <temporary-target>`; không chạy mù vào
+- [x] Dùng `bun create next-app@latest <temporary-target>`; không chạy mù vào
   non-empty root.
-- [ ] `package.json`, `bun.lock`, App Router, TypeScript và route handlers được
+- [x] `package.json`, `bun.lock`, App Router, TypeScript và route handlers được
   giữ theo baseline sinh ra.
-- [ ] Mock identity/protection chỉ đi qua seam có thể thay bằng provider,
+- [x] Mock identity/protection chỉ đi qua seam có thể thay bằng provider,
   redirect, middleware/proxy, verifier và E2EE SDK sau này.
-- [ ] Banner `MOCK MODE — TideCloak integration pending` hiện cố định; không có
-  claim ciphertext, token verification hoặc E2EE thật.
-- [ ] Không ghi đè tài liệu; `tidecloak.json` chỉ được track sau khi xác nhận không
+- [x] Không có nhãn mock-mode theo quyết định user; UI không claim ciphertext,
+  token verification hoặc E2EE thật.
+- [x] Không ghi đè tài liệu; `tidecloak.json` chỉ được track sau khi xác nhận không
   chứa client secret hay confidential material.
 
 **Verification:**
@@ -123,16 +123,16 @@ official integration.
 
 **Acceptance criteria:**
 
-- [ ] Ghi exact Node/Next.js/React versions và scripts thật.
-- [ ] Ghi mock adapter contract, banner bắt buộc và các điểm thay thế bằng SDK.
-- [ ] Để trống version/API cụ thể của `@tidecloak/nextjs` cho đến khi official
+- [x] Ghi exact Node/Next.js/React versions và scripts thật.
+- [x] Ghi mock adapter contract, banner bắt buộc và các điểm thay thế bằng SDK.
+- [x] Để trống version/API cụ thể của `@tidecloak/nextjs` cho đến khi official
   existing-app integration hoàn tất.
 
 **Verification:**
 
-- [ ] Cross-check với package/lockfile và generated source.
-- [ ] Không còn câu nào tuyên bố `package.json` vắng mặt sau khi scaffold đã merge.
-- [ ] Không có câu nào xem mock output là bằng chứng TideCloak.
+- [x] Cross-check với package/lockfile và generated source.
+- [x] Không còn câu nào tuyên bố `package.json` vắng mặt sau khi scaffold đã merge.
+- [x] Không có câu nào xem mock output là bằng chứng TideCloak.
 
 **Dependencies:** P1.3
 **Files likely touched:** `docs/specification.md`, `docs/tidecloak-integration.md`,
