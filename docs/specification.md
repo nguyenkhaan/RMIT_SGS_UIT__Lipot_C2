@@ -94,6 +94,7 @@ The generated project structure takes precedence. The target responsibility layo
 ├── public/                     # Generated silent-SSO assets, if present
 ├── docs/                       # SDD source of truth
 ├── AGENTS.md                   # Agent operating rules
+├── docker-compose.yaml          # Local TideCloak service; password comes from the shell environment
 ├── tidecloak.json              # Adapter config only if safe for a public repository
 └── package.json                # Actual commands and dependency versions
 ```

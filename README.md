@@ -45,4 +45,8 @@ Prerequisites:
   running project scripts. See [docs/guide-pland.md](docs/guide-pland.md).
 - Internet access for Tide enrolment and Cybersecurity Fabric operations.
 
+The local TideCloak service is declared in `docker-compose.yaml`. Follow the
+password-safe startup instructions in [docs/tidecloak-integration.md](docs/tidecloak-integration.md);
+do not put a bootstrap password in the repository.
+
 Do not treat the repository as runnable until `package.json` exists and the setup instructions have been verified against it.

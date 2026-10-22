@@ -31,20 +31,43 @@ Prerequisites from the current quickstart:
 - Node.js 20.9 or later;
 - Bun, internet connectivity, and a browser for Tide enrolment.
 
-Use a dedicated Docker volume so local TideCloak state never lands in the repository:
+Use the committed `docker-compose.yaml` and its dedicated named volume so local
+TideCloak state never lands in the repository. The bootstrap password is required
+from the shell environment and is never written to YAML, `.env`, or version control.
 
-```powershell
-docker volume create rental-passport-tidecloak-data
+For Bash or Zsh:
 
-docker run --name rental-passport-tidecloak -d `
-  -v rental-passport-tidecloak-data:/opt/keycloak/data/h2 `
-  -p 8080:8080 `
-  -e KC_BOOTSTRAP_ADMIN_USERNAME=admin `
-  -e KC_BOOTSTRAP_ADMIN_PASSWORD=change-me-for-local-dev `
-  tideorg/tidecloak-dev:latest
+```bash
+read -rs -p 'TideCloak local bootstrap password: ' TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
+printf '\n'
+export TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
+docker compose -f docker-compose.yaml up -d --force-recreate
+docker compose -f docker-compose.yaml ps
+unset TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
 ```
 
-The named volume uses the same container data path as the official quickstart without binding the repository root. The placeholder bootstrap password is for local development only; replace it at runtime and never commit a real password.
+For fish:
+
+```fish
+read -s -P 'TideCloak local bootstrap password: ' TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
+echo
+set -gx TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD $TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
+docker compose -f docker-compose.yaml up -d --force-recreate
+docker compose -f docker-compose.yaml ps
+set -e TIDECLOAK_BOOTSTRAP_ADMIN_PASSWORD
+```
+
+The named volume uses the same container data path as the official quickstart
+without binding the repository root. The current TideCloak image runs as UID 1000,
+whereas Docker creates a new named volume as root-owned. The one-shot
+`tidecloak-storage-init` service therefore corrects ownership before TideCloak
+starts; it should finish as `exited (0)`. The main
+`rental-passport-tidecloak` service must show `running`.
+
+`--force-recreate` replaces only the failed container configuration. It does not
+remove the named volume, so it does not discard existing local realm state. Per
+`AGENTS.md`, the user runs these commands and reports the output; agents do not
+start or inspect local containers by default.
 
 Expected console location after realm creation:
 
@@ -171,6 +194,7 @@ Do not log token contents, decrypted package content, passwords, or raw SDK resp
 ## 12. Integration Verification
 
 - [ ] Dev container is healthy on port 8080.
+- [ ] `docker compose -f docker-compose.yaml ps` shows `rental-passport-tidecloak` running.
 - [ ] Realm is licensed, Tide IdP is linked, and QEA is enabled.
 - [ ] Next.js client origin and redirect URI are committed.
 - [ ] Four distinct accounts can sign in.

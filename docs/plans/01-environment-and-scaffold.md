@@ -18,16 +18,27 @@ cần bảo toàn trước khi generator chạy.
 
 **Acceptance criteria:**
 
-- [ ] `docker version`, `node --version`, `bun --version` chạy được; Node đáp ứng
+- [x] `docker version`, `node --version`, `bun --version` chạy được; Node đáp ứng
   yêu cầu hiện hành của quickstart.
-- [ ] `git status --short` được kiểm tra và mọi thay đổi có sẵn của người dùng
+- [x] `git status --short` được kiểm tra và mọi thay đổi có sẵn của người dùng
   được giữ nguyên.
-- [ ] `README.md`, `AGENTS.md`, `docs/` không bị đưa vào vùng generator có thể ghi đè.
+- [x] `README.md`, `AGENTS.md`, `docs/` không bị đưa vào vùng generator có thể ghi đè.
 
 **Verification:**
 
-- [ ] Lưu output phiên bản vào implementation notes của phase.
-- [ ] So sánh `rg --files` trước/sau scaffold để phát hiện file bị thay ngoài ý muốn.
+- [x] Lưu output phiên bản vào implementation notes của phase.
+- [x] So sánh `rg --files` trước/sau scaffold để phát hiện file bị thay ngoài ý muốn.
+
+### P1.1 execution record — 2026-10-22
+
+- Docker client/server: `29.9.1` / `29.9.1`
+- Node.js: `v26.12.0`
+- Bun: `1.3.14`
+- Initial `git status --short`: clean.
+- Baseline manifest contains documentation only; `package.json`, `bun.lock`,
+  `package-lock.json`, `node_modules/`, and `vendor/` are absent.
+- Preserve `README.md`, `AGENTS.md`, and `docs/` when P1.3 merges the generated
+  scaffold from its temporary directory.
 
 **Dependencies:** Không  
 **Files likely touched:** Không  
@@ -35,19 +46,22 @@ cần bảo toàn trước khi generator chạy.
 
 ## Task P1.2 — Khởi động TideCloak dev container an toàn
 
-**Mô tả:** Chạy image chính thức với named Docker volume, không bind repository
-vào `/opt/keycloak/data/h2`, và giữ bootstrap credential ngoài source control.
+**Mô tả:** User chạy service khai báo trong `docker-compose.yaml` với named Docker
+volume, không bind repository vào `/opt/keycloak/data/h2`, và giữ bootstrap
+credential ngoài source control. Một init service dùng chính image TideCloak sẽ
+cấp quyền ghi volume cho UID chạy server trước khi service chính khởi động.
 
 **Acceptance criteria:**
 
-- [ ] Container `rental-passport-tidecloak` chạy trên port 8080.
+- [ ] Init service kết thúc `exited (0)` và container `rental-passport-tidecloak`
+  từ `docker-compose.yaml` chạy trên port 8080.
 - [ ] Named volume chứa local state bên ngoài repository.
 - [ ] Console phản hồi; password thật không xuất hiện trong tracked file hoặc log
   được đưa vào repository.
 
 **Verification:**
 
-- [ ] `docker ps` báo container healthy/running.
+- [ ] User reports `docker compose -f docker-compose.yaml ps` báo container running.
 - [ ] Mở TideCloak console thành công.
 - [ ] `git status --short` không xuất hiện local database hoặc secret file.
 

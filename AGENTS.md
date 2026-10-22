@@ -57,6 +57,25 @@ If documents conflict, follow the precedence defined in `docs/CONTENT.md`. Updat
 
 ## Engineering Boundaries
 
+## Command Execution Responsibility
+
+The user runs routine local commands. Agents must conserve time by providing the
+exact command and interpreting the user's output instead of executing it.
+
+- Do not run routine system checks such as `docker version`, `node --version`, or
+  `bun --version`.
+- Do not install, resolve, update, or audit dependencies, including `bun install`,
+  `bun add`, `bun update`, or any equivalent package-manager command.
+- Do not start, stop, inspect, or follow local services/containers, including
+  `docker` lifecycle commands and `bun --bun run dev`.
+- Do not run lint, build, test, or other package scripts by default. Give the
+  exact Bun command to the user and wait for the reported output.
+- The only exception is an explicit, direct request to run a named command. State
+  the result and any files it changed; otherwise treat command execution as the
+  user's responsibility.
+- Read-only repository inspection needed to edit source or documentation remains
+  permitted, but keep it proportional to the task.
+
 Always:
 
 - Keep the core demo loop working before adding polish.
