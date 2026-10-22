@@ -2,6 +2,11 @@
 
 ## Mục đích
 
+> **Temporary mock-MVP override (2026-10-22):** Khi TideCloak được bên thứ ba
+> sửa, nhóm được phép thực hiện `plans/00-mock-mvp-bridge.md` trên Next.js App
+> Router. Đây là mock được gắn nhãn bắt buộc, không phải kết quả security hoặc
+> acceptance. Khi service sẵn sàng, quay lại sequence real TideCloak bên dưới.
+
 File này là guide vận hành duy nhất bổ sung cho bộ phase plan hiện có. Nó phân
 công hai người theo module/feature, chỉ ra dependency bằng **Chờ**, và thiết lập
 Bun là package manager chuẩn. Các phase trong `docs/plans/` giữ nguyên scope và
@@ -53,8 +58,8 @@ Nguồn: <https://bun.sh/docs/runtime/templating/create>,
 | --- | --- | --- |
 | P1.1 — Preflight môi trường, Bun và bảo toàn repository | A | Bắt đầu; không phụ thuộc. |
 | P1.2 — Khởi động TideCloak dev container bằng named volume | A | **Chờ** P1.1. |
-| P1.3 — Scaffold official initializer ở temporary directory, merge baseline và `bun.lock` | B | **Chờ** P1.2. A review generated Tide configuration trước merge. |
-| P1.4 — Ghi version, generated contract và Bun commands thật vào spec | A | **Chờ** P1.3. |
+| P1.3 — Scaffold mock Next.js baseline ở temporary directory, merge và `bun.lock` | B | **Mock-mode exception** khi TideCloak bị chặn. |
+| P1.4 — Ghi version, mock-to-Tide contract và Bun commands thật vào spec | A | **Chờ** P1.3. |
 | P2.1 — Xác nhận realm, client, redirect URI, license và QEA | A | **Chờ** checkpoint Phase 1. |
 | P2.2 — Tạo/enrol `tenant`, `manager-a`, `manager-b`, `admin` và business roles | B | **Chờ** P2.1. Không dùng bootstrap master-admin làm demo account. |
 | P2.3 — Tạo/commit/gán bốn E2EE realm roles theo từng user | A | **Chờ** P2.2. Không đưa role vào `default-roles-<realm>`. |

@@ -2,9 +2,10 @@
 
 ## Trạng thái và phạm vi
 
-Bộ tài liệu này chuyển dự án từ **Specify** sang **Plan**. Chưa phase nào được
-phép triển khai cho đến khi kế hoạch được duyệt. Repository hiện chưa có
-`package.json`, vì vậy chưa được xem là runnable.
+Bộ tài liệu này đã được người dùng duyệt cho **temporary mock-MVP
+implementation** trong khi TideCloak được bên thứ ba sửa. Mock MVP chỉ là một
+integration harness, không thay thế real TideCloak acceptance; mọi màn hình và
+kết quả mock phải được gắn nhãn rõ ràng.
 
 Mục tiêu là hoàn thiện prototype trong tối đa bảy giờ, dùng một Next.js project
 cho cả frontend và backend. Mỗi capability được giao theo vertical feature
@@ -22,6 +23,7 @@ mỗi phase, đọc phần liên quan trong:
 4. [`../tidecloak-integration.md`](../tidecloak-integration.md)
 5. [`../demo-guide.md`](../demo-guide.md)
 6. [`../decisions/ADR-001-core-architecture.md`](../decisions/ADR-001-core-architecture.md)
+7. [`../decisions/ADR-002-temporary-mock-mvp-bridge.md`](../decisions/ADR-002-temporary-mock-mvp-bridge.md)
 
 Nếu generated project hoặc tài liệu Tide hiện hành khác spec, dừng phase, ghi
 nhận khác biệt và cập nhật spec trước khi viết code phụ thuộc vào khác biệt đó.
@@ -59,6 +61,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
+    M0[Mock MVP bridge: temporary]
     P1[Phase 1: Environment + official scaffold]
     P2[Phase 2: Realm + four identities + roles]
     P3[Phase 3: Authenticated full-stack shell]
@@ -67,6 +70,7 @@ flowchart TD
     P6[Phase 6: Admin metadata + revocation + hardening]
     P7[Phase 7: Acceptance + docs + demo]
 
+    M0 -. preserves contracts for .-> P1
     P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
 ```
 
@@ -78,6 +82,7 @@ feature sau.
 
 | Phase | Kết quả có thể kiểm chứng | Ngân sách | Phụ thuộc |
 | --- | --- | ---: | --- |
+| [00](00-mock-mvp-bridge.md) | Mock UI/API MVP có nhãn, sẵn sàng thay adapter | Chỉ khi TideCloak bị chặn | User approval |
 | [01](01-environment-and-scaffold.md) | TideCloak dev container và official Next.js scaffold chạy được | 45 phút | Không |
 | [02](02-realm-identities-and-policies.md) | Bốn tài khoản và E2EE role matrix đúng | 60 phút | Phase 1 |
 | [03](03-authenticated-full-stack-shell.md) | Auth shell và token-verified package API tối thiểu | 50 phút | Phase 2 |
@@ -91,6 +96,9 @@ feature sau.
 Nếu trễ, cắt polish và automated unit test chưa được cấu hình trước; không cắt
 real TideCloak, negative decrypt cases, token verification, lint/build hoặc demo
 dưới hai phút.
+
+Trong thời gian TideCloak bị chặn, Phase 00 là ngoại lệ có thời hạn. Nó không
+được dùng để đánh dấu các checkpoint Phase 1–7 là đã hoàn thành.
 
 ## Definition of Done toàn dự án
 
@@ -115,6 +123,8 @@ dưới hai phút.
 - Automated test chỉ dùng cho pure domain logic nếu toolchain generated đã hỗ
   trợ hoặc đã được người dùng duyệt thêm dependency.
 - Mock E2EE không được tính là integration proof.
+- Mock MVP phải có banner cố định và không được gọi payload mô phỏng là
+  ciphertext hoặc kết quả mô phỏng là TideCloak policy enforcement.
 - Manual acceptance matrix bằng TideCloak thật là bắt buộc ở Phase 5–7.
 - Sau mọi thay đổi role phải renew session trước khi kết luận quyền mới.
 

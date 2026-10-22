@@ -6,8 +6,8 @@
 - **Challenge page:** <https://tide.org/unlocked#start>
 - **Product:** Rental Application Passport
 - **Implementation timebox:** maximum seven hours
-- **Current phase:** Plan; phase files exist under `docs/plans/`, but application
-  code has not been scaffolded yet
+- **Current phase:** temporary mock-MVP implementation; real TideCloak
+  integration is blocked while a third party repairs the local service
 
 This document combines the supplied challenge requirements with the product decisions confirmed during discovery. Before submission, compare it once more with the live challenge page in case the organiser changes a rule.
 
@@ -32,6 +32,10 @@ The prototype must show that decryption authority comes from a real TideCloak id
    and server route/store work in parallel, followed by an integration checkpoint.
 10. Use Bun as the project package manager and script runner. Commit `bun.lock`;
     do not create or commit `package-lock.json`.
+11. Until TideCloak is available, build a minimal, visibly labelled mock MVP on
+    the same Next.js frontend and route-handler backend architecture. Its
+    identity and package-protection adapters must be replaceable by the real
+    TideCloak SDK integration without changing domain, API, or UI contracts.
 
 ## 4. Functional Requirements
 
@@ -84,6 +88,15 @@ Removing a decrypt role is a governed administrative change. After the change is
 ### TR-1 — Real integration
 
 Use the official Next.js SDK, TideCloak dev server, Tide enrolment, QEA-enabled realm, and E2EE helpers. Mock authentication or simulated cryptography cannot satisfy the core demo.
+
+#### Temporary mock-MVP exception
+
+The approved recovery MVP may simulate the four identities and allow/deny
+outcomes only while the service is being repaired. It must render a persistent
+`MOCK MODE — TideCloak integration pending` notice, must not describe encoded
+or simulated payloads as ciphertext, and must not be represented as satisfying
+TR-1, FR-3, FR-4, TR-2, TR-3, or TR-5. The real TideCloak acceptance matrix is
+still mandatory before a Challenge submission is claimed as compliant.
 
 ### TR-2 — Tag roles
 

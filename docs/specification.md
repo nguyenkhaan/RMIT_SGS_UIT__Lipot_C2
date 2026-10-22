@@ -6,6 +6,15 @@ Build a local Next.js prototype that proves selective disclosure of rental appli
 
 The prototype is successful when the same ciphertext is handled by the application without giving every signed-in user, the application backend, or the administrator a universal way to decrypt it.
 
+### Temporary mock-MVP mode
+
+While TideCloak is repaired, the project may ship a visibly marked workflow MVP
+using simulated identities and outcomes. It is a UI/API integration harness,
+not a security proof: it must never claim encryption, real authentication, or
+cryptographic selective decryption. The mock boundary is replaced by the
+generated TideCloak provider, token verifier, and E2EE helpers as soon as the
+service is available.
+
 ## 2. Assumptions
 
 1. Docker CLI is available; Docker Desktop is optional.
@@ -15,6 +24,8 @@ The prototype is successful when the same ciphertext is handled by the applicati
 5. Synthetic JSON/document previews are sufficient; no binary file upload is needed.
 6. Four separate TideCloak accounts are available before recording the demo.
 7. The seven-hour limit applies to implementation and demo preparation, so every optional feature must yield to the access-control story.
+8. The mock MVP preserves stable identity, package, access-decision, and route
+   contracts so a real TideCloak adapter can replace it without a UI rewrite.
 
 ## 3. User Stories
 
@@ -38,6 +49,11 @@ The prototype is successful when the same ciphertext is handled by the applicati
 | Storage | In-memory or local prototype store containing ciphertext and safe metadata only |
 | Styling | Use the generated baseline; add only what improves the demo story |
 | Deployment | Local development environment |
+
+In temporary mock-MVP mode, an ordinary App Router baseline may be scaffolded
+with Bun while the official initializer is blocked. Tide's official tutorial
+documents adding `@tidecloak/nextjs` to an existing App Router application, so
+this is an intentional bridge rather than a permanent framework fork.
 
 No exact Next.js, React, Node package, or SDK version is pinned in this document because the repository has not been scaffolded. Do not invent versions. Record the generated versions after initialization.
 
@@ -141,6 +157,8 @@ Run the full identity/package matrix from `requirement.md` using real TideCloak 
 - Lint the application with the script generated or configured in `package.json`.
 - Produce a successful production build.
 - Confirm no secret or plaintext package appears in tracked files or console logs.
+- In mock mode, confirm the persistent mock notice is visible and that no test
+  result is called a TideCloak or E2EE result.
 
 ### Automated tests
 
@@ -175,6 +193,7 @@ The TideCloak integration is verified manually against the running dev container
 - Give Admin a package decrypt role.
 - Treat hidden UI as authorization.
 - Fall back to mock auth/E2EE in the submitted demo.
+- Hide or make the mock-mode label dismissible.
 - Claim that revocation erases information already viewed.
 - Claim that a one-admin QEA realm demonstrates multi-party approval.
 
@@ -192,6 +211,8 @@ The TideCloak integration is verified manually against the running dev container
 - [ ] Lint and production build pass.
 - [ ] README challenge overview remains under 300 words.
 - [ ] The complete story can be recorded in under two minutes.
+- [ ] The temporary mock MVP, if used, is visibly marked and described only as
+  an integration harness.
 
 ## 11. Open Verification Items
 

@@ -55,6 +55,16 @@ after each shared contract is fixed.
 - Sends matching tags on encryption and decryption.
 - Converts SDK failures into a safe `AccessDecision` without logging plaintext or tokens.
 
+### Temporary mock bridge
+
+Until TideCloak is healthy, the app uses two narrow adapters: an identity
+adapter for the active demo identity and a package-protection adapter for the
+simulated allow/deny result. They expose the same domain outputs needed by the
+UI and route handlers, but they provide **no security guarantee**. A persistent
+mock-mode notice prevents their results from being mistaken for TideCloak
+authentication or E2EE. The production-target implementation replaces these
+adapters with the SDK provider, token verifier, `doEncrypt`, and `doDecrypt`.
+
 ### Ciphertext store
 
 For the prototype, this may be an in-memory store or a minimal local fixture generated at runtime. It contains:
@@ -176,6 +186,9 @@ Synthetic plaintext exists only long enough to serialize and encrypt it in the b
 - A single-admin QEA development realm does not demonstrate multi-party approval.
 - Local in-memory storage does not demonstrate durability or multi-device synchronisation.
 - UI-level metadata restrictions are not a substitute for API token verification if an API is introduced.
+- Mock-mode identity, package protection, and allow/deny outcomes are not
+  authentication, ciphertext, or policy enforcement and cannot be used as
+  Challenge acceptance evidence.
 
 ## 11. Architecture Risks
 

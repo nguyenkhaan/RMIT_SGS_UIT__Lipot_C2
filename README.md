@@ -29,13 +29,18 @@ The prototype uses four separate TideCloak accounts: renter, Manager A, Manager 
 
 ## Status
 
-The repository is currently in the planning phase. The implementation plan is
-under [`docs/plans/`](docs/plans/README.md); application code has not been
-scaffolded yet.
+TideCloak is being repaired by a third party. The project is therefore building
+a temporary, visibly labelled mock MVP on the same Next.js frontend and
+route-handler backend architecture. It is an integration harness only—not real
+TideCloak authentication, E2EE, or Challenge acceptance evidence. The migration
+contract is documented in [`docs/plans/00-mock-mvp-bridge.md`](docs/plans/00-mock-mvp-bridge.md).
 
 ## Setup
 
-The implementation will use the official TideCloak Next.js initializer and a local TideCloak dev container. Until scaffolding is complete, use [docs/CONTENT.md](docs/CONTENT.md) as the entry point for requirements, architecture, integration, and acceptance criteria.
+The final implementation will use the official TideCloak Next.js SDK and a local
+TideCloak dev container. The temporary Next.js mock baseline remains ready for
+the official existing-app integration documented in
+[`docs/tidecloak-integration.md`](docs/tidecloak-integration.md).
 
 Prerequisites:
 

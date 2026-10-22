@@ -1,5 +1,10 @@
 # Demo and Acceptance Guide
 
+> **Temporary mock-MVP notice:** Until TideCloak is repaired, this guide may be
+> rehearsed with a visibly labelled mock workflow. That rehearsal is not the
+> Challenge acceptance demo and must not narrate simulated identities, payloads,
+> or denials as real TideCloak/E2EE results.
+
 ## 1. Demo Goal
 
 In under two minutes, prove one sentence:

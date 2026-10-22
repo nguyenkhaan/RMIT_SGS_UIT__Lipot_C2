@@ -4,6 +4,23 @@
 
 This document defines the minimum real TideCloak integration required by the prototype. It is based on official Tide documentation checked on 2026-10-22. Generated code and current official documentation must be rechecked during implementation because no `package.json` exists yet.
 
+## Temporary Mock-MVP Bridge
+
+TideCloak is currently being repaired by a third party. By direct project
+decision, the app may temporarily use a mock identity adapter and a mock package
+protection adapter to build the Next.js frontend and route-handler flow. This is
+not an alternative integration: it must be visibly labelled `MOCK MODE —
+TideCloak integration pending`, has no security claim, and is not valid E2EE,
+token-verification, or Challenge acceptance evidence.
+
+Keep these boundaries stable so the real integration is a swap rather than a UI
+rewrite: the browser identity adapter, browser package-protection adapter,
+server-side session verifier, and package API shapes are the only replacement
+points. When TideCloak is available, use the official existing-Next.js tutorial
+to add `@tidecloak/nextjs`, then replace the bridge with the generated provider,
+redirect route, proxy/middleware, server verifier, and `doEncrypt` / `doDecrypt`
+calls. Do not retain mock mode for the real acceptance run.
+
 ## 2. Official Starting Point
 
 The project uses the official Next.js initializer through Bun:
