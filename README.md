@@ -52,15 +52,13 @@ Prerequisites:
 
 The local TideCloak service is declared in `docker-compose.yaml`. Follow the
 password-safe startup instructions in [docs/tidecloak-integration.md](docs/tidecloak-integration.md);
-do not put a bootstrap password in the repository.
 
 The generated manifest currently exposes these commands:
 
+Please intall Bunjs for the application demo: 
 ```powershell
 bun install
 bun --bun run dev
-bun --bun run test
-bun --bun run build
 ```
 
 No `lint` script exists yet. Do not report it as passing until it has been
